@@ -1,0 +1,52 @@
+read myId:int startDistance:int
+gameloop
+read myHp:int myStamina:int oppHp:int oppStamina:int
+read myMove:word(16) myFrame:int oppMove:word(16) oppFrame:int
+loop 19 read x:int y:int vx:int vy:int
+loop 19 read oppX:int oppY:int oppVx:int oppVy:int
+loop 15 read angle:float speed:int target:float strength:int
+loop 15 read oppAngle:float oppSpeed:int oppTarget:float oppStrength:int
+read myRise:int oppRise:int myRound:int oppRound:int sinceContact:int sinceHit:int
+loopline 12 apart:int
+write STANCE
+
+STATEMENT
+Drive your fighter: land strikes, keep your balance and stay in the ring.
+
+INPUT
+myId: 0 if you are on the left (facing right), 1 on the right (facing left)
+startDistance: distance between the two pelvises at the start, in mm
+myHp: your HP
+myStamina: your stamina, in thousandths of a percent (100000 = 100 %)
+oppHp: your opponent's HP
+oppStamina: your opponent's stamina
+myMove: the move you are in: a move name, or JOINTS
+myFrame: how many turns of that move have been played (0 for a held pose)
+oppMove: the move your opponent is in
+oppFrame: how many turns of it have been played
+x: x of one of your points, in mm (points in the order of the statement)
+y: y of that point, in mm
+vx: horizontal speed of that point, in mm/s
+vy: vertical speed of that point, in mm/s
+oppX: x of one of your opponent's points
+oppY: y of that point
+oppVx: horizontal speed of that point
+oppVy: vertical speed of that point
+angle: angle of one of your joints, in degrees (joints in the order of the statement)
+speed: how fast that joint turns, in degrees per second
+target: target angle of its motor, in degrees
+strength: strength of its motor, in %
+oppAngle: angle of one of your opponent's joints
+oppSpeed: how fast it turns
+oppTarget: target angle of its motor
+oppStrength: strength of its motor
+myRise: how deep you are ducked, in quarters (0 to 4)
+oppRise: how deep your opponent is ducked
+myRound: 1 when your lead leg went around the opponent's body last turn (round kick), else 0
+oppRound: the same for your opponent
+sinceContact: turns since the fighters last touched (0: during the last turn, 21 at most)
+sinceHit: turns since a strike last took HP (0: during the last turn, 21 at most)
+apart: physics steps since a striking part last touched the other fighter (0 to 10): your lead glove, rear glove, lead foot, rear foot, lead knee, rear knee, then your opponent's
+
+OUTPUT
+A command: a move (STANCE, GUARD, RELAX, DUCK, JAB, CROSS, OVERHAND, KICK, HIGH_KICK, STEP_FORWARD, STEP_BACK, JUMP), WAIT, or JOINTS from the second league; optionally followed by a message.
