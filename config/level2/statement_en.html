@@ -37,7 +37,7 @@
 
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">The fighter</h3>
 <p>A fighter is 19 points, 65.4 kg in all, joined by 20 rigid bones. Both fighters stand as two right-handed boxers face to face: LEAD is the side in front, REAR the other one.</p>
-<div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794642383847/1bafa0923b79d39e3899b7ef88c461b9426426631168339d19f95097c718acb0.png" alt="The 19 points of a fighter, numbered, lead side in blue, rear side in orange" style="max-width: 100%; border-radius: 8px" /></div>
+<div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794655631881/1bafa0923b79d39e3899b7ef88c461b9426426631168339d19f95097c718acb0.png" alt="The 19 points of a fighter, numbered, lead side in blue, rear side in orange" style="max-width: 100%; border-radius: 8px" /></div>
 <table style="border-collapse: collapse; margin: 8px 0">
   <tr><th style="padding: 2px 8px">#</th><th style="padding: 2px 8px">Point</th><th style="padding: 2px 8px">Mass (kg)</th><th style="padding: 2px 8px">Radius (mm)</th></tr>
   <tr><td style="padding: 2px 8px">0</td><td style="padding: 2px 8px">HEAD</td><td style="padding: 2px 8px">5</td><td style="padding: 2px 8px">110</td></tr>
@@ -62,7 +62,7 @@
 
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">Joints and motors</h3>
 <p>15 joints, each driven by a motor, in this order:</p>
-<div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794642383847/0745a659ab3c2e60401cfd91a2878d5286351d4d784803cd0230481ed724712c.png" alt="Where 0 degrees is and which way is positive for each joint" style="max-width: 100%; border-radius: 8px" /></div>
+<div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794655631881/0745a659ab3c2e60401cfd91a2878d5286351d4d784803cd0230481ed724712c.png" alt="Where 0 degrees is and which way is positive for each joint" style="max-width: 100%; border-radius: 8px" /></div>
 <table style="border-collapse: collapse; margin: 8px 0">
   <tr><th style="padding: 2px 6px">#</th><th style="padding: 2px 6px">Joint</th><th style="padding: 2px 6px">0&deg;</th><th style="padding: 2px 6px">Positive angles</th><th style="padding: 2px 6px">Range (&deg;)</th><th style="padding: 2px 6px">Max torque (N&middot;m)</th><th style="padding: 2px 6px">Max speed (rad/s)</th></tr>
   <tr><td style="padding: 2px 6px">0</td><td style="padding: 2px 6px">NECK</td><td style="padding: 2px 6px">head in line with the upper back</td><td style="padding: 2px 6px">head forward, chin tucked</td><td style="padding: 2px 6px">-30 to 45</td><td style="padding: 2px 6px">40</td><td style="padding: 2px 6px">10</td></tr>
@@ -137,7 +137,7 @@ or JOINTS with a value missing or one too many.
 
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">Legs and balance</h3>
 <p>A fighter keeps its balance while its <strong>weight point</strong> stays over its feet. The weight point is where the body is heading: the <var>x</var> of its centre of mass plus the speed of the centre of mass &times; &radic;(height of the centre of mass &divide; 9.81) (in m and m/s). Once it is well past the toes or the heels, the fighter is falling, unless a foot goes under it.</p>
-<div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794642383847/23dc2f098bba196443e0fb3b604aa0c36546e859661c21dc8920db0e5d549d55.png" alt="Strike zones, and the weight point against the feet" style="max-width: 100%; border-radius: 8px" /></div>
+<div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794655631881/23dc2f098bba196443e0fb3b604aa0c36546e859661c21dc8920db0e5d549d55.png" alt="Strike zones, and the weight point against the feet" style="max-width: 100%; border-radius: 8px" /></div>
 <p>For the held poses, the punches and the steps, <strong>the engine runs the legs</strong>, at 100 % strength. It aims the hips, knees and ankles so that the pelvis stands where the move wants it above the feet, at the start of the turn and again every 10 ms while a foot moves. Besides:</p>
 <ul>
   <li>The ankles lean against where the weight goes: both ankle targets are shifted by 60&deg; per metre that the centre of mass is off the middle of the feet (from the rear heel to the lead toes), plus 40&deg; per m/s of its speed, 15&deg; at most.</li>

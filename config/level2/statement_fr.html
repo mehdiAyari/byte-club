@@ -37,7 +37,7 @@
 
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">Le combattant</h3>
 <p>Un combattant, c'est 19 points, 65,4 kg en tout, reliés par 20 os rigides. Les deux combattants se tiennent comme deux boxeurs droitiers face à face : LEAD est le côté de devant, REAR l'autre.</p>
-<div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794642383847/1bafa0923b79d39e3899b7ef88c461b9426426631168339d19f95097c718acb0.png" alt="Les 19 points d'un combattant, numérotés, le côté avant en bleu, le côté arrière en orange" style="max-width: 100%; border-radius: 8px" /></div>
+<div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794655631881/1bafa0923b79d39e3899b7ef88c461b9426426631168339d19f95097c718acb0.png" alt="Les 19 points d'un combattant, numérotés, le côté avant en bleu, le côté arrière en orange" style="max-width: 100%; border-radius: 8px" /></div>
 <table style="border-collapse: collapse; margin: 8px 0">
   <tr><th style="padding: 2px 8px">#</th><th style="padding: 2px 8px">Point</th><th style="padding: 2px 8px">Masse (kg)</th><th style="padding: 2px 8px">Rayon (mm)</th></tr>
   <tr><td style="padding: 2px 8px">0</td><td style="padding: 2px 8px">HEAD</td><td style="padding: 2px 8px">5</td><td style="padding: 2px 8px">110</td></tr>
@@ -62,7 +62,7 @@
 
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">Articulations et moteurs</h3>
 <p>15 articulations, chacune actionnée par un moteur, dans cet ordre :</p>
-<div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794642383847/0745a659ab3c2e60401cfd91a2878d5286351d4d784803cd0230481ed724712c.png" alt="Où se trouve 0 degré et quel est le sens positif pour chaque articulation" style="max-width: 100%; border-radius: 8px" /></div>
+<div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794655631881/0745a659ab3c2e60401cfd91a2878d5286351d4d784803cd0230481ed724712c.png" alt="Où se trouve 0 degré et quel est le sens positif pour chaque articulation" style="max-width: 100%; border-radius: 8px" /></div>
 <table style="border-collapse: collapse; margin: 8px 0">
   <tr><th style="padding: 2px 6px">#</th><th style="padding: 2px 6px">Articulation</th><th style="padding: 2px 6px">0&deg;</th><th style="padding: 2px 6px">Angles positifs</th><th style="padding: 2px 6px">Plage (&deg;)</th><th style="padding: 2px 6px">Couple max (N&middot;m)</th><th style="padding: 2px 6px">Vitesse max (rad/s)</th></tr>
   <tr><td style="padding: 2px 6px">0</td><td style="padding: 2px 6px">NECK</td><td style="padding: 2px 6px">tête dans l'axe du haut du dos</td><td style="padding: 2px 6px">tête en avant, menton rentré</td><td style="padding: 2px 6px">-30 à 45</td><td style="padding: 2px 6px">40</td><td style="padding: 2px 6px">10</td></tr>
@@ -137,7 +137,7 @@ ou JOINTS avec une valeur manquante ou une valeur en trop.
 
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">Jambes et équilibre</h3>
 <p>Un combattant garde son équilibre tant que son <strong>point d'appui</strong> reste au-dessus de ses pieds. Le point d'appui, c'est là où va le corps : le <var>x</var> de son centre de masse plus la vitesse du centre de masse &times; &radic;(hauteur du centre de masse &divide; 9,81) (en m et m/s). Dès qu'il dépasse nettement les orteils ou les talons, le combattant tombe, sauf si un pied vient se placer dessous.</p>
-<div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794642383847/23dc2f098bba196443e0fb3b604aa0c36546e859661c21dc8920db0e5d549d55.png" alt="Les zones de frappe, et le point d'appui par rapport aux pieds" style="max-width: 100%; border-radius: 8px" /></div>
+<div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794655631881/23dc2f098bba196443e0fb3b604aa0c36546e859661c21dc8920db0e5d549d55.png" alt="Les zones de frappe, et le point d'appui par rapport aux pieds" style="max-width: 100%; border-radius: 8px" /></div>
 <p>Pour les poses tenues, les coups de poing et les pas, <strong>le moteur du jeu pilote les jambes</strong>, à 100 % de force. Il oriente les hanches, les genoux et les chevilles pour que le bassin se place là où le mouvement le veut au-dessus des pieds, au début du tour puis toutes les 10 ms tant qu'un pied bouge. De plus :</p>
 <ul>
   <li>Les chevilles s'opposent au déplacement du poids : les deux cibles des chevilles sont décalées de 60&deg; par mètre d'écart entre le centre de masse et le milieu des pieds (du talon arrière aux orteils avant), plus 40&deg; par m/s de sa vitesse, 15&deg; au plus.</li>
