@@ -361,5 +361,25 @@ Il en va de même pour <action>JOINTS</action>.
     </div>
   </div>
 </div>
-
+<!-- BEGIN level1 -->
+<div style="color: #7cc576; background-color: rgba(124, 197, 118,.1); padding: 20px; margin-top: 10px; text-align: left;">
+  <div style="text-align: center; margin-bottom: 6px"><img src="//cdn.codingame.com/smash-the-code/statement/league_wood_04.png" /></div>
+  <p style="text-align: center; font-weight: 700; margin-bottom: 6px;">Qu'est-ce qui m'attend dans les ligues suivantes ?</p>
+  Les règles supplémentaires disponibles dans les ligues supérieures seront les suivantes :
+  <ul>
+    <li>La commande <action>JOINTS</action> : vous pilotez vous-même vos 15 articulations, avec un angle visé et une force pour chacune.</li>
+    <li><strong>L'endurance</strong> : chaque muscle que vous contractez coûte de l'endurance, chaque coup reçu en retire, et un combattant fatigué est plus faible.</li>
+  </ul>
+</div>
+<!-- END -->
+<!-- BEGIN level2 -->
+<div style="color: #7cc576; background-color: rgba(124, 197, 118,.1); padding: 20px; margin-top: 10px; text-align: left;">
+  <div style="text-align: center; margin-bottom: 6px"><img src="//cdn.codingame.com/smash-the-code/statement/league_wood_04.png" /></div>
+  <p style="text-align: center; font-weight: 700; margin-bottom: 6px;">Qu'est-ce qui m'attend dans les ligues suivantes ?</p>
+  La ligue suivante ajoute une règle :
+  <ul>
+    <li><strong>L'endurance</strong> : chaque muscle que vous contractez coûte de l'endurance, chaque coup reçu en retire, et un combattant fatigué est plus faible.</li>
+  </ul>
+</div>
+<!-- END -->
 </div>
