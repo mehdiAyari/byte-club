@@ -37,7 +37,8 @@
   <div class="statement-goal-content">
     <em>La première règle du Byte Club : vous codez votre combattant, articulation par articulation.</em><br><br>
     Deux combattants s'affrontent sur un ring vu de côté. Votre bot pilote l'un d'eux : un corps physique de 19 points mû par 15 moteurs d'articulation.
-    Portez des coups, gardez votre équilibre et restez dans le ring. Amenez votre adversaire à <const>0</const> PV, ou ayez plus de PV que lui après <const>250</const> tours.
+    Portez des coups, gardez votre équilibre et restez dans le ring. Amenez votre adversaire à <const>0</const> PV, ou ayez plus de PV que lui après <const>250</const> tours.<br><br>
+    Code source du jeu (arbitre, moteur physique, visualiseur) : <a href="https://github.com/mehdiAyari/byte-club" target="_blank">github.com/mehdiAyari/byte-club</a>
   </div>
 </div>
 
@@ -298,7 +299,7 @@ Il en va de même pour <action>JOINTS</action>.
   <h1><span class="icon icon-expertrules">&nbsp;</span><span>Règles pour les experts</span></h1>
   <div class="statement-expert-rules-content">
     <ul>
-      <li><strong>L'entrée est l'état complet du match.</strong> Le code source de l'arbitre est disponible : une copie de son moteur (les classes <var>Game</var>, <var>Physics</var>, <var>Moves</var> et <var>Command</var>) reconstruite à partir de ce que vous lisez (<var>Game.fromInput</var>) et à qui l'on donne les commandes des deux combattants calcule exactement l'entrée du tour suivant. La seule chose que vous ne connaissez pas est la commande de l'adversaire ; son corps, ses moteurs, son mouvement en cours et son étape sont tous dans l'entrée.</li>
+      <li><strong>L'entrée est l'état complet du match.</strong> Le code source de l'arbitre est disponible <a href="https://github.com/mehdiAyari/byte-club" target="_blank">sur GitHub</a> : une copie de son moteur (les classes <var>Game</var>, <var>Physics</var>, <var>Moves</var> et <var>Command</var>) reconstruite à partir de ce que vous lisez (<var>Game.fromInput</var>) et à qui l'on donne les commandes des deux combattants calcule exactement l'entrée du tour suivant. La seule chose que vous ne connaissez pas est la commande de l'adversaire ; son corps, ses moteurs, son mouvement en cours et son étape sont tous dans l'entrée.</li>
       <li>Rien n'est aléatoire pendant un match. Seule la distance de départ est tirée au hasard ; dans l'IDE, vous pouvez la fixer avec le paramètre de jeu <var>distance</var>.</li>
       <li>Un pas de physique n'utilise que des additions, des soustractions, des multiplications, des divisions et des racines carrées (atan2 est écrit avec elles) sur des nombres flottants 64 bits : il donne donc les mêmes nombres dans tous les langages.</li>
       <li>Un pas de 2,5 ms, dans cet ordre :

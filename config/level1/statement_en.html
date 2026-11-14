@@ -17,7 +17,8 @@
   <div class="statement-goal-content">
     <em>The first rule of Byte Club: you code your fighter, joint by joint.</em><br><br>
     Two fighters face each other in a ring seen from the side. Your bot drives one of them: a physical body of 19 points moved by 15 joint motors.
-    Land strikes, keep your balance and stay in the ring. Bring your opponent to <const>0</const> HP, or have more HP than it after <const>250</const> turns.
+    Land strikes, keep your balance and stay in the ring. Bring your opponent to <const>0</const> HP, or have more HP than it after <const>250</const> turns.<br><br>
+    Source code of the game (referee, physics engine, viewer): <a href="https://github.com/mehdiAyari/byte-club" target="_blank">github.com/mehdiAyari/byte-club</a>
   </div>
 </div>
 
@@ -209,7 +210,7 @@ During these moves, keeping the fighter on its feet is up to your bot: a kick th
   <h1><span class="icon icon-expertrules">&nbsp;</span><span>Expert Rules</span></h1>
   <div class="statement-expert-rules-content">
     <ul>
-      <li><strong>The input is the whole state of the match.</strong> The source code of the referee is available: a copy of its engine (the classes <var>Game</var>, <var>Physics</var>, <var>Moves</var> and <var>Command</var>) rebuilt from what you read (<var>Game.fromInput</var>) and given both fighters' commands computes exactly the input of the next turn. The only thing you don't know is the opponent's command; its body, its motors, its running move and its frame are all in the input.</li>
+      <li><strong>The input is the whole state of the match.</strong> The source code of the referee is available <a href="https://github.com/mehdiAyari/byte-club" target="_blank">on GitHub</a>: a copy of its engine (the classes <var>Game</var>, <var>Physics</var>, <var>Moves</var> and <var>Command</var>) rebuilt from what you read (<var>Game.fromInput</var>) and given both fighters' commands computes exactly the input of the next turn. The only thing you don't know is the opponent's command; its body, its motors, its running move and its frame are all in the input.</li>
       <li>Nothing is random during a match. Only the starting distance is drawn; in the IDE, you can set it with the game parameter <var>distance</var>.</li>
       <li>A physics step uses only additions, subtractions, multiplications, divisions and square roots (atan2 is written with them) on 64-bit floating-point numbers, so it gives the same numbers in every language.</li>
       <li>One step of 2.5 ms, in this order:
