@@ -16,6 +16,8 @@ public final class Game {
     public static final int FALL = 20;                 // HP lost by a fall or a ring-out
     /** A fall is free when the fighters touched and no strike scored in the last WINDOW turns: a push, not a knockdown. */
     public static final int WINDOW = 20;
+    /** A match where the fighters have not touched for STALE turns stops: the fighter with more HP wins (sinceContact counts these turns). */
+    public static final int STALE = 150;
     public static final int FULL = 100000;             // stamina is counted in thousandths of a percent
     public static final int REGEN = 3500, HIT_DRAIN = 1000;
     /** Stamina spent per turn and per percent of strength, for each joint. */
@@ -23,6 +25,28 @@ public final class Game {
     /** Ankle reflex of the held poses: degrees per metre of lean, per metre per second, and the most it adds. */
     public static final double RKP = 60, RKD = 40, RMAX = 15;
     static final int NP = Physics.NP, NJ = Physics.NJ, NS = Physics.NS;
+
+    // ---------- the frame of the input
+    /**
+     * Each player reads the match as the fighter on the left, facing right: the fighter on the right reads the scene mirrored.
+     * The origin is at the top left of the scene: x grows to the right and y downward, in millimetres. The centre of the ring
+     * is at x = XOFF and the floor at y = YTOP.
+     */
+    public static final int XOFF = 5000, YTOP = 3000;
+    /** The lines of the input of a turn: one per fighter, one with the points of both fighters, then the two counters. */
+    public static final int INPUT_LINES = 4;
+    /** The values given for each point on the line of the points: x y vx vy apart angle target strength. */
+    public static final int PER_POINT = 8;
+    /** For each point, the joint that moves it (-1: none). The input gives that joint's angle and motor with the point. */
+    public static final int[] JOINT_AT = new int[NP];
+    /** For each point, the striking part at it, as an index in Physics.STRIKERS (-1: none). The input gives its contact counter with the point. */
+    public static final int[] STRIKER_AT = new int[NP];
+    static {
+        Arrays.fill(JOINT_AT, -1);
+        Arrays.fill(STRIKER_AT, -1);
+        for (int j = 0; j < NJ; j++) JOINT_AT[Physics.JC[j]] = j;
+        for (int k = 0; k < Physics.STRIKERS.length; k++) STRIKER_AT[Physics.SH[Physics.STRIKERS[k]][1]] = k;
+    }
 
     public final Physics w = new Physics();
     public final boolean staminaOn, jointsOn;
@@ -41,6 +65,8 @@ public final class Game {
     public boolean stoodUp;
     public final int[][] look = {{2, 1}, {5, 0}};
     public final String[] message = {"", ""};
+    /** What the referee tells about the line of each fighter this turn: what was not played as written, or null. */
+    public final String[] warning = new String[2];
     /** When not null, simulate() stores here the points after steps 10, 20, 30 and 40, in millimetres: [4][2 * 38]. */
     public int[][] film;
 
@@ -63,9 +89,13 @@ public final class Game {
     }
 
     // ---------- commands
-    /** Gives the line written by fighter f for this turn. Returns null, or why the line is refused. */
+    /**
+     * Gives the line written by fighter f for this turn. Returns null, or why the line is refused (the player is eliminated).
+     * warning[f] then tells what was not played as written, or is null.
+     */
     public String apply(int f, String line) {
         Command c = Command.parse(line, turn == 0, jointsOn);
+        warning[f] = c.warning;
         if (c.error != null) return c.error;
         if (c.skin >= 0) { look[f][0] = c.skin; look[f][1] = c.hair; }
         message[f] = c.message;
@@ -367,8 +397,10 @@ public final class Game {
                 for (int i = 0; i < Physics.N; i++) { fr[2 * i] = (int) Math.rint(w.px[i] * 1000); fr[2 * i + 1] = (int) Math.rint(w.py[i] * 1000); }
             }
         }
+        // everything the turn decides is settled now, at its end: first the HP taken by the strikes found during the steps
+        for (int f = 0; f < 2; f++) w.hp[f] -= w.damage[f];
         hitLoss[0] = hp0 - w.hp[0]; hitLoss[1] = hp1 - w.hp[1];
-        sinceContact = w.contactSteps > 0 ? 0 : Math.min(sinceContact + 1, WINDOW + 1);
+        sinceContact = w.contactSteps > 0 ? 0 : Math.min(sinceContact + 1, STALE);
         sinceHit = hitLoss[0] > 0 || hitLoss[1] > 0 ? 0 : Math.min(sinceHit + 1, WINDOW + 1);
         if (staminaOn) for (int f = 0; f < 2; f++) stamina[f] = Math.max(0, stamina[f] - HIT_DRAIN * hitLoss[f]);
         // a fall costs FALL, except when the fighters have been pushing each other without anyone landing a hit
@@ -390,7 +422,9 @@ public final class Game {
         turn++;
     }
 
-    public boolean over() { return w.hp[0] <= 0 || w.hp[1] <= 0 || turn >= MAX_TURNS; }
+    public boolean over() { return w.hp[0] <= 0 || w.hp[1] <= 0 || turn >= MAX_TURNS || stale(); }
+    /** The fighters have not touched for STALE turns: nothing is happening, the match stops. */
+    public boolean stale() { return sinceContact >= STALE; }
     /** The winner, or -1 for a draw. */
     public int winner() {
         if (w.hp[0] <= 0 && w.hp[1] <= 0) return -1;
@@ -399,27 +433,31 @@ public final class Game {
     public int score(int f) { return Math.max(0, w.hp[f]); }
 
     // ---------- what the bots read
-    public String initLine(int p) { return p + " " + startDistance; }
+    /** The line of the start: the distance between the two pelvises, the same for both players. */
+    public String initLine(int p) { return String.valueOf(startDistance); }
 
-    /** The 72 lines given to player p at the start of a turn. */
+    /**
+     * The INPUT_LINES lines given to player p at the start of a turn, in the frame of the input (see XOFF): one line per fighter
+     * (p first), then one line with the 38 points (p's 19 points first), PER_POINT values each: position, speed, the contact
+     * counter of the striking part at the point, and the angle and motor of the joint that moves the point. Then the two
+     * counters of the match.
+     */
     public List<String> inputLines(int p) {
-        List<String> out = new ArrayList<>(72);
+        List<String> out = new ArrayList<>(INPUT_LINES);
         int o = 1 - p;
-        out.add(w.hp[p] + " " + stamina[p] + " " + w.hp[o] + " " + stamina[o]);
-        out.add(moveName(p) + " " + frame[p] + " " + moveName(o) + " " + frame[o]);
-        for (int g = 0; g < 2; g++) {
-            int b = (g == 0 ? p : o) * NP;
-            for (int i = b; i < b + NP; i++) out.add(mm(w.px[i]) + " " + mm(w.py[i]) + " " + mm(w.vx[i]) + " " + mm(w.vy[i]));
+        long s = p == 0 ? 1 : -1;                          // the fighter on the right reads the scene mirrored
+        for (int f : new int[]{p, o}) out.add(w.hp[f] + " " + stamina[f] + " " + moveName(f) + " " + frame[f] + " " + rise[f] + " " + (w.roundLeg[f] ? 1 : 0));
+        StringBuilder b = new StringBuilder(2 * NP * PER_POINT * 6);
+        for (int f : new int[]{p, o}) for (int i = 0; i < NP; i++) {
+            int q = f * NP + i, j = JOINT_AT[i], k = STRIKER_AT[i];
+            if (b.length() > 0) b.append(' ');
+            b.append(XOFF + s * mm(w.px[q])).append(' ').append(YTOP - mm(w.py[q])).append(' ').append(s * mm(w.vx[q])).append(' ').append(-mm(w.vy[q]))
+                .append(' ').append(k < 0 ? Physics.SEP : w.apart[f * NS + Physics.STRIKERS[k]]);
+            if (j < 0) b.append(" 0.00 0.00 0");
+            else b.append(' ').append(deg(angleC(f, j))).append(' ').append(deg(target[f][j])).append(' ').append(strength[f][j]);
         }
-        for (int j = 0; j < NJ; j++) out.add(deg(angleC(p, j)) + " " + speed(p, j) + " " + deg(target[p][j]) + " " + strength[p][j]);
-        for (int j = 0; j < NJ; j++) out.add(deg(angleC(o, j)) + " " + speed(o, j) + " " + deg(target[o][j]) + " " + strength[o][j]);
-        out.add(rise[p] + " " + rise[o] + " " + (w.roundLeg[p] ? 1 : 0) + " " + (w.roundLeg[o] ? 1 : 0) + " " + sinceContact + " " + sinceHit);
-        StringBuilder sb = new StringBuilder();
-        for (int g = 0; g < 2; g++) for (int k = 0; k < Physics.STRIKERS.length; k++) {
-            if (sb.length() > 0) sb.append(' ');
-            sb.append(w.apart[(g == 0 ? p : o) * NS + Physics.STRIKERS[k]]);
-        }
-        out.add(sb.toString());
+        out.add(b.toString());
+        out.add(sinceContact + " " + sinceHit);
         return out;
     }
 
@@ -439,35 +477,29 @@ public final class Game {
     }
 
     /**
-     * Rebuilds the game from what player p read: the line of the start and the 72 lines of a turn. The input is the whole state:
-     * give the copy a command for each fighter (apply, command or setRaw), and simulate() gives exactly what the referee will send next.
+     * Rebuilds the game from what a player read: the line of the start and the INPUT_LINES lines of a turn. The input is the whole
+     * state. In the copy, the player is fighter 0, on the left, as the input shows it: give the copy the player's command with
+     * apply(0, ...) and the opponent's with apply(1, ...) (or command, or setRaw), and after simulate(), inputLines(0) is exactly
+     * what the referee will send next.
      */
     public static Game fromInput(String initLine, List<String> lines, boolean staminaOn, boolean jointsOn) {
-        String[] q = initLine.trim().split(" ");
-        int p = Integer.parseInt(q[0]), o = 1 - p;
-        Game g = new Game(Integer.parseInt(q[1]), staminaOn, jointsOn);
-        int n = 0;
-        q = lines.get(n++).split(" ");
-        g.w.hp[p] = Integer.parseInt(q[0]); g.stamina[p] = Integer.parseInt(q[1]); g.w.hp[o] = Integer.parseInt(q[2]); g.stamina[o] = Integer.parseInt(q[3]);
-        q = lines.get(n++).split(" ");
-        g.move[p] = q[0].equals("JOINTS") ? Moves.NONE : Moves.index(q[0]); g.frame[p] = Integer.parseInt(q[1]);
-        g.move[o] = q[2].equals("JOINTS") ? Moves.NONE : Moves.index(q[2]); g.frame[o] = Integer.parseInt(q[3]);
-        for (int k = 0; k < 2; k++) {
-            int b = (k == 0 ? p : o) * NP;
-            for (int i = b; i < b + NP; i++) {
-                q = lines.get(n++).split(" ");
-                g.w.px[i] = Integer.parseInt(q[0]) / 1000.0; g.w.py[i] = Integer.parseInt(q[1]) / 1000.0;
-                g.w.vx[i] = Integer.parseInt(q[2]) / 1000.0; g.w.vy[i] = Integer.parseInt(q[3]) / 1000.0;
-            }
+        Game g = new Game(Integer.parseInt(initLine.trim()), staminaOn, jointsOn);
+        for (int f = 0; f < 2; f++) {
+            String[] q = lines.get(f).trim().split(" ");
+            g.w.hp[f] = Integer.parseInt(q[0]); g.stamina[f] = Integer.parseInt(q[1]);
+            g.move[f] = q[2].equals("JOINTS") ? Moves.NONE : Moves.index(q[2]); g.frame[f] = Integer.parseInt(q[3]);
+            g.rise[f] = Integer.parseInt(q[4]); g.w.roundLeg[f] = q[5].equals("1");
         }
-        for (int j = 0; j < NJ; j++) { q = lines.get(n++).split(" "); g.target[p][j] = hundredths(q[2]); g.strength[p][j] = Integer.parseInt(q[3]); }
-        for (int j = 0; j < NJ; j++) { q = lines.get(n++).split(" "); g.target[o][j] = hundredths(q[2]); g.strength[o][j] = Integer.parseInt(q[3]); }
-        q = lines.get(n++).split(" ");
-        g.rise[p] = Integer.parseInt(q[0]); g.rise[o] = Integer.parseInt(q[1]); g.w.roundLeg[p] = q[2].equals("1"); g.w.roundLeg[o] = q[3].equals("1");
-        g.sinceContact = Integer.parseInt(q[4]); g.sinceHit = Integer.parseInt(q[5]);
-        q = lines.get(n).split(" ");
-        for (int k = 0; k < 2; k++) for (int i = 0; i < Physics.STRIKERS.length; i++)
-            g.w.apart[(k == 0 ? p : o) * NS + Physics.STRIKERS[i]] = Integer.parseInt(q[k * Physics.STRIKERS.length + i]);
+        String[] q = lines.get(2).trim().split(" ");
+        for (int f = 0; f < 2; f++) for (int i = 0; i < NP; i++) {
+            int idx = f * NP + i, j = JOINT_AT[i], k = STRIKER_AT[i], b = PER_POINT * idx;
+            g.w.px[idx] = (Integer.parseInt(q[b]) - XOFF) / 1000.0; g.w.py[idx] = (YTOP - Integer.parseInt(q[b + 1])) / 1000.0;
+            g.w.vx[idx] = Integer.parseInt(q[b + 2]) / 1000.0; g.w.vy[idx] = -Integer.parseInt(q[b + 3]) / 1000.0;
+            if (k >= 0) g.w.apart[f * NS + Physics.STRIKERS[k]] = Integer.parseInt(q[b + 4]);
+            if (j >= 0) { g.target[f][j] = hundredths(q[b + 6]); g.strength[f][j] = Integer.parseInt(q[b + 7]); }
+        }
+        q = lines.get(3).trim().split(" ");
+        g.sinceContact = Integer.parseInt(q[0]); g.sinceHit = Integer.parseInt(q[1]);
         return g;
     }
 

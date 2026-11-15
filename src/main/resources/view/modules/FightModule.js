@@ -625,7 +625,7 @@ function ring (XR, out) {
   g.stroke()
   g.strokeStyle = 'rgba(176,36,26,0.85)'; g.lineWidth = 4 * K
   for (const s of [-1, 1]) { const a = P(s * XR, 0, zb); const b = P(s * XR, 0, -zf); g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.stroke() }   // ring-out lines
-  g.fillStyle = 'rgba(40,30,20,0.36)'; g.font = '700 22px ' + FONT; g.textAlign = 'center'; g.textBaseline = 'middle'
+  g.fillStyle = 'rgba(40,30,20,0.36)'; g.font = '700 36px ' + FONT; g.textAlign = 'center'; g.textBaseline = 'middle'
   for (let x = -Math.floor(XR); x <= Math.floor(XR); x++) { const q = P(x, 0, -0.58); g.fillText(x + ' m', q[0], q[1]) }
   g.restore()
   g.strokeStyle = 'rgba(255,255,255,0.4)'; g.lineWidth = 2 * K; g.beginPath(); g.moveTo(D[0], D[1]); g.lineTo(C[0], C[1]); g.stroke()   // front edge
@@ -674,22 +674,22 @@ function shadows (pm) {
 // ---------- texts over the scene
 /** The move of each fighter above its head. texts[who]: { text, muted } or null. */
 function labels (pm, texts) {
-  g.font = '800 26px ' + FONT; spacing(1.5); g.textAlign = 'center'; g.textBaseline = 'middle'
+  g.font = '800 36px ' + FONT; spacing(1.5); g.textAlign = 'center'; g.textBaseline = 'middle'
   const L = []
   for (let who = 0; who < 2; who++) {
     if (!texts[who]) continue
-    const tw = g.measureText(texts[who].text).width + 30
+    const tw = g.measureText(texts[who].text).width + 34
     const hx = clamp(X(pm[who].head[0]), tw / 2 + 8, W - tw / 2 - 8); const hy = Math.max(204, Y(pm[who].head[1]) - 0.2 * S)
     L.push({ who, x: hx, y: hy, w: tw, t: texts[who] })
   }
-  if (L.length === 2 && Math.abs(L[0].y - L[1].y) < 44) {                 // side by side: push them apart
+  if (L.length === 2 && Math.abs(L[0].y - L[1].y) < 56) {                 // side by side: push them apart
     const over = (L[0].w + L[1].w) / 2 + 10 - Math.abs(L[0].x - L[1].x)
     if (over > 0) { const s = L[0].x <= L[1].x ? -1 : 1; L[0].x += s * over / 2; L[1].x -= s * over / 2 }
   }
   for (const l of L) {
-    g.fillStyle = 'rgba(10,8,14,0.66)'; g.beginPath(); rrect(l.x - l.w / 2, l.y - 40, l.w, 40, 10); g.fill()
+    g.fillStyle = 'rgba(10,8,14,0.66)'; g.beginPath(); rrect(l.x - l.w / 2, l.y - 52, l.w, 52, 12); g.fill()
     g.fillStyle = l.t.muted ? 'rgba(225,225,232,0.78)' : TONE[l.who].label
-    g.fillText(l.t.text, l.x, l.y - 19)
+    g.fillText(l.t.text, l.x, l.y - 25)
   }
   spacing(0)
 }
@@ -764,7 +764,7 @@ function hitEffect (e, age) {
   if (big && age < 2) { g.fillStyle = 'rgba(255,255,255,' + 0.14 * k * (1 - age / 2) + ')'; g.fillRect(-60, -60, W + 120, H + 120) }
   // the damage number pops at the impact, then drifts up and toward the attacker's side, away from the head that was hit
   const drift = (Math.min(age, 14) * 2 + Math.max(0, age - 14) * 0.6) * K; const a = age < 16 ? 1 : 1 - (age - 16) / 10
-  const size0 = none ? 26 : 27 + 30 * k; const size = age < 2 ? size0 * (1.5 - age * 0.25) : size0
+  const size0 = none ? 36 : 36 + 24 * k; const size = age < 2 ? size0 * (1.5 - age * 0.25) : size0
   let hop = 0                                                             // this number steps aside for each newer hit close by, just before it lands
   if (e.push) for (const t of e.push) { const o = clamp((e.t + age - t) / 2 + 1, 0, 1); hop += o * (2 - o) }
   const tx = clamp(x + (e.who === 0 ? -1 : 1) * (12 * z + drift * 1.2 + hop * size0 * 1.9), 150, W - 150)
@@ -779,9 +779,9 @@ function hitEffect (e, age) {
     const left = (e.cut === undefined ? Infinity : e.cut) - e.t - age       // a newer hit close by: this line is gone when the new one lands
     const a2 = Math.min(1, a) * (age < 12 ? 1 : 1 - (age - 12) / 6) * (none ? 0.8 : 1) * clamp(left / 2, 0, 1)
     if (a2 > 0.01) {
-      g.font = '600 26px ' + FONT; g.lineWidth = 5; g.strokeStyle = 'rgba(20,10,10,' + a2 * 0.9 + ')'; g.fillStyle = 'rgba(255,255,255,' + a2 + ')'
+      g.font = '600 36px ' + FONT; g.lineWidth = 5; g.strokeStyle = 'rgba(20,10,10,' + a2 * 0.9 + ')'; g.fillStyle = 'rgba(255,255,255,' + a2 + ')'
       const s2 = e.with + ' → ' + e.on + ' · ' + e.v.toFixed(1) + ' m/s' + (none ? ' · no damage' : '')
-      g.strokeText(s2, tx, ty + 30); g.fillText(s2, tx, ty + 30)
+      g.strokeText(s2, tx, ty + 42); g.fillText(s2, tx, ty + 42)
     }
   }
 }
@@ -800,7 +800,7 @@ function blockEffect (e, age) {
     }
   }
   const a = age < 9 ? 1 : 1 - (age - 9) / 5
-  g.font = '800 26px ' + FONT; g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.lineJoin = 'round'; spacing(1.5)
+  g.font = '800 36px ' + FONT; g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.lineJoin = 'round'; spacing(1.5)
   const tx = clamp(x, 80, W - 80)                                        // above the spark, or under it when a hit close by needs the room above
   const ty = e.low ? Math.min(H - 150, y + 26 * z + 20 + age * 1.4 * K) : Math.max(250, y - 26 * z - age * 1.4 * K)
   g.lineWidth = 5; g.strokeStyle = 'rgba(10,14,24,' + a * 0.9 + ')'; g.strokeText('BLOCK', tx, ty)
@@ -829,7 +829,7 @@ function stepCues (view, tf) {
 }
 
 // ---------- banners
-const BAN = { y: 1010, h: 46, life: 36 }  // a fall or a ring-out: a band at the bottom, clear of the fighters
+const BAN = { y: 1002, h: 56, life: 36 }  // a fall or a ring-out: a band at the bottom, clear of the fighters
 const FIN = { y: 800, h: 80 }             // the result, in the part of the screen the end screen of the player leaves free
 /** o: { alpha, color, big, cost, costColor, small } */
 function banner (y, o) {
@@ -837,14 +837,14 @@ function banner (y, o) {
   g.fillStyle = 'rgba(8,6,12,0.94)'; g.fillRect(0, y - BAN.h, W, 2 * BAN.h)
   g.fillStyle = o.color; g.fillRect(0, y - BAN.h, W, 5); g.fillRect(0, y + BAN.h - 5, W, 5)
   g.textBaseline = 'middle'; g.font = '900 46px ' + FONT; spacing(3)
-  const cy = o.small ? y - 11 : y + 2
+  const cy = o.small ? y - 16 : y + 2
   const gap = o.cost ? 44 : 0
   const big = fit(o.big, W - 500); const w1 = g.measureText(big).width; const w2 = o.cost ? g.measureText(o.cost).width : 0
   let x = W / 2 - (w1 + gap + w2) / 2
   g.textAlign = 'left'; g.fillStyle = '#ffffff'; g.fillText(big, x, cy)
   if (o.cost) { x += w1 + gap; g.fillStyle = o.costColor; g.fillText(o.cost, x, cy) }
   spacing(0)
-  if (o.small) { g.textAlign = 'center'; g.font = '600 26px ' + FONT; g.fillStyle = 'rgba(255,255,255,0.8)'; g.fillText(o.small, W / 2, y + 27) }
+  if (o.small) { g.textAlign = 'center'; g.font = '600 36px ' + FONT; g.fillStyle = 'rgba(255,255,255,0.8)'; g.fillText(o.small, W / 2, y + 32) }
   g.restore()
 }
 /** The result of the match. o: { alpha, color, big, small } */
@@ -856,7 +856,7 @@ function finalBanner (o) {
   g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '900 62px ' + FONT; spacing(4)
   g.fillStyle = '#ffffff'; g.fillText(fit(o.big, W - 160), W / 2, o.small ? y - 16 : y + 2)
   spacing(0)
-  if (o.small) { g.font = '600 34px ' + FONT; g.fillStyle = 'rgba(255,255,255,0.85)'; g.fillText(fit(o.small, W - 160), W / 2, y + 40) }
+  if (o.small) { g.font = '600 36px ' + FONT; g.fillStyle = 'rgba(255,255,255,0.85)'; g.fillText(fit(o.small, W - 160), W / 2, y + 40) }
   g.restore()
 }
 
@@ -896,20 +896,20 @@ function shapesOverlay (pm, shapes, bones, kinds) {
 }
 function shapesLegend () {
   const items = [['body shapes', SHAPE_BODY], ['striking shapes', SHAPE_STRIKER], ['points', null]]
-  g.font = '700 26px ' + FONT; g.textAlign = 'left'; g.textBaseline = 'middle'
+  g.font = '700 36px ' + FONT; g.textAlign = 'left'; g.textBaseline = 'middle'
   let w = 30; for (const it of items) w += 46 + g.measureText(it[0]).width + 30
   const x0 = 24; const y0 = 196
-  g.fillStyle = 'rgba(8,8,14,0.72)'; g.beginPath(); rrect(x0, y0, w - 14, 46, 10); g.fill()
+  g.fillStyle = 'rgba(8,8,14,0.72)'; g.beginPath(); rrect(x0, y0, w - 14, 58, 12); g.fill()
   let x = x0 + 18
   for (const [text, c] of items) {
     if (c) {
       g.fillStyle = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',0.25)'; g.strokeStyle = 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; g.lineWidth = 3.5
-      g.beginPath(); rrect(x, y0 + 13, 34, 20, 10); g.fill(); g.stroke()
+      g.beginPath(); rrect(x, y0 + 19, 34, 20, 10); g.fill(); g.stroke()
     } else {
-      g.beginPath(); g.arc(x + 17, y0 + 23, 7, 0, 7); g.fillStyle = 'rgba(8,10,16,0.9)'; g.fill()
-      g.beginPath(); g.arc(x + 17, y0 + 23, 5, 0, 7); g.fillStyle = '#ffffff'; g.fill()
+      g.beginPath(); g.arc(x + 17, y0 + 29, 7, 0, 7); g.fillStyle = 'rgba(8,10,16,0.9)'; g.fill()
+      g.beginPath(); g.arc(x + 17, y0 + 29, 5, 0, 7); g.fillStyle = '#ffffff'; g.fill()
     }
-    g.fillStyle = '#f3efe6'; g.fillText(text, x + 46, y0 + 24)
+    g.fillStyle = '#f3efe6'; g.fillText(text, x + 46, y0 + 30)
     x += 46 + g.measureText(text).width + 30
   }
 }
@@ -944,7 +944,7 @@ function hudSide (who, o) {
   g.stroke()
   quad(at(0, bw), at(100, bw), y, y + bh); g.strokeStyle = 'rgba(255,255,255,0.3)'; g.lineWidth = 2; g.stroke()
   // name and HP number
-  g.textBaseline = 'alphabetic'; g.fillStyle = '#f3efe6'; g.font = '800 32px ' + FONT
+  g.textBaseline = 'alphabetic'; g.fillStyle = '#f3efe6'; g.font = '800 36px ' + FONT
   g.textAlign = right ? 'left' : 'right'
   const hpText = Math.max(0, Math.round(o.hp)) + ' HP'
   g.fillText(hpText, at(100, bw) + sh(y), y - 11)
@@ -957,26 +957,26 @@ function hudSide (who, o) {
     const sw = bw - 112; const hh = 12
     quad(at(0, sw), at(100, sw), ym, ym + hh); g.fillStyle = 'rgba(0,0,0,0.62)'; g.fill()
     if (o.st > 0) { quad(at(0, sw), at(o.st, sw), ym, ym + hh); g.fillStyle = GOLD; g.fill() }
-    g.font = '700 26px ' + FONT; g.textBaseline = 'middle'; g.textAlign = right ? 'right' : 'left'; g.fillStyle = 'rgba(240,206,120,0.95)'
+    g.font = '700 36px ' + FONT; g.textBaseline = 'middle'; g.textAlign = right ? 'right' : 'left'; g.fillStyle = 'rgba(240,206,120,0.95)'
     g.fillText(Math.round(o.st) + ' %', at(100, sw) + d * 16 + sh(ym + hh / 2), ym + hh / 2 + 1)
-    ym += hh + 9
+    ym += hh + 18
   }
   if (o.msg && o.msgAlpha > 0.01) {                                       // the bot's message: one calm line
-    g.font = 'italic 600 26px ' + FONT; g.textBaseline = 'middle'; g.textAlign = right ? 'right' : 'left'
-    const txt = fit(o.msg, bw - 10); const tw = g.measureText(txt).width + 28; const x0 = xo + sh(ym + 18) - d * 4
+    g.font = 'italic 600 36px ' + FONT; g.textBaseline = 'middle'; g.textAlign = right ? 'right' : 'left'
+    const txt = fit(o.msg, bw - 10); const tw = g.measureText(txt).width + 32; const x0 = xo + sh(ym + 23) - d * 4
     g.globalAlpha = o.msgAlpha
-    g.fillStyle = 'rgba(8,8,14,0.6)'; g.beginPath(); rrect(right ? x0 - tw : x0, ym, tw, 36, 8); g.fill()
-    g.fillStyle = tone.label; g.fillText(txt, x0 + d * 14, ym + 19)
+    g.fillStyle = 'rgba(8,8,14,0.6)'; g.beginPath(); rrect(right ? x0 - tw : x0, ym, tw, 46, 10); g.fill()
+    g.fillStyle = tone.label; g.fillText(txt, x0 + d * 16, ym + 24)
     g.globalAlpha = 1
   }
 }
 function hudTurn (n, total, te) {
-  g.fillStyle = 'rgba(0,0,0,0.62)'; g.beginPath(); rrect(W / 2 - 150, 20, 300, 56, 12); g.fill()
+  g.fillStyle = 'rgba(0,0,0,0.62)'; g.beginPath(); rrect(W / 2 - 170, 16, 340, 64, 12); g.fill()
   g.strokeStyle = 'rgba(255,255,255,0.24)'; g.lineWidth = 2; g.stroke()
-  g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f3efe6'; g.font = '800 30px ' + FONT; spacing(1.5)
+  g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f3efe6'; g.font = '800 36px ' + FONT; spacing(1.5)
   g.fillText('TURN ' + n + ' / ' + total, W / 2, 49)
   spacing(0)
-  g.fillStyle = 'rgba(255,255,255,0.6)'; g.font = '600 24px ' + FONT; g.fillText((te * 0.025).toFixed(1) + ' s', W / 2, 97)
+  g.fillStyle = 'rgba(255,255,255,0.6)'; g.font = '600 36px ' + FONT; g.fillText((te * 0.025).toFixed(1) + ' s', W / 2, 106)
 }
 
 // ---------- the module
@@ -1229,14 +1229,18 @@ export class FightModule {
     const hp = who => Math.max(0, Math.round(this.turns[N].hp[who]))
     const w = e.winner === 0 || e.winner === 1 ? e.winner : -1
     const o = { alpha, color: w < 0 ? GOLD : TONE[w].label, big: '', small: null }
-    if (e.how === 2) {
+    // how: 0 time, 1 knockout, 2 eliminated, 3 no contact for too long, 4 an error of the referee
+    const why = e.how === 3 ? 'No contact' : 'Time'
+    if (e.how === 4) {
+      o.big = 'DRAW'; o.small = 'the referee stopped the match'
+    } else if (e.how === 2) {
       if (w < 0) { o.big = 'BOTH PLAYERS ELIMINATED'; o.small = 'no winner' } else { o.big = this.name(1 - w) + ' ELIMINATED'; o.small = this.name(w) + ' wins' }
     } else if (w < 0) {
-      o.big = 'DRAW'; o.small = e.how === 1 ? 'double knockout' : hp(0) === hp(1) ? 'Time: ' + hp(0) + ' HP each' : 'Time: ' + hp(0) + ' HP to ' + hp(1)
+      o.big = 'DRAW'; o.small = e.how === 1 ? 'double knockout' : hp(0) === hp(1) ? why + ': ' + hp(0) + ' HP each' : why + ': ' + hp(0) + ' HP to ' + hp(1)
     } else if (e.how === 1) {
       o.big = this.name(w) + ' WINS BY KNOCKOUT'; o.small = hp(w) + ' HP left'
     } else {
-      o.big = 'TIME: ' + this.name(w) + ' WINS'; o.small = hp(w) + ' HP to ' + hp(1 - w)
+      o.big = why.toUpperCase() + ': ' + this.name(w) + ' WINS'; o.small = hp(w) + ' HP to ' + hp(1 - w)
     }
     return o
   }

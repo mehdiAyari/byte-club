@@ -25,10 +25,10 @@ The full rules are in the statement: [`config/statement_en.html.tpl`](config/sta
 The input your bot reads each turn is the whole state of the match. A copy of the engine, rebuilt from that input and given both fighters' commands, computes exactly the input of the next turn:
 
 ```java
-Game copy = Game.fromInput(initLine, linesOfThisTurn, staminaOn, jointsOn);
-copy.apply(0, myCommand);           // or the opponent's command you predict
-copy.apply(1, opponentCommand);
-copy.simulate();                    // copy.inputLines(me) is now exactly what you will read next turn
+Game copy = Game.fromInput(initLine, linesOfThisTurn, staminaOn, jointsOn);   // you are fighter 0, on the left, as the input shows it
+copy.apply(0, myCommand);
+copy.apply(1, opponentCommand);     // the opponent's command you predict
+copy.simulate();                    // copy.inputLines(0) is now exactly what you will read next turn
 ```
 
 The engine is four classes in [`src/main/java/com/codingame/game/engine`](src/main/java/com/codingame/game/engine):

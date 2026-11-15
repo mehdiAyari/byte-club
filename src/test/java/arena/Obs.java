@@ -1,61 +1,62 @@
 package arena;
 
+import com.codingame.game.engine.Game;
 import com.codingame.game.engine.Physics;
 import java.util.List;
 
-/** What a bot reads: the line of the start, then 72 lines per turn. Lengths in metres, speeds in m/s, angles in degrees. */
+/**
+ * What a bot reads: the line of the start, then Game.INPUT_LINES lines per turn. The input shows the match from the left, so the
+ * bot is always fighter 0 (me), on the left, facing right. Here, lengths are in metres from the centre of the ring, with y up
+ * from the floor (the frame of the engine), speeds in m/s, angles in degrees.
+ */
 public final class Obs {
     public static final int NP = Physics.NP, NJ = Physics.NJ;
     public static final int[] FACING = {1, -1};
-    public int me, opp, turn = -1, myFrame, oppFrame, startDistance;
+    public final int me = 0, opp = 1;
+    /** The real side of the bot, given by the bench when it knows it (the input does not tell it): only the Script bot uses it. */
+    public int side;
+    public int turn = -1, myFrame, oppFrame, startDistance;
     public String myMove = "STANCE", oppMove = "STANCE";
     public final int[] hp = new int[2], stamina = new int[2];              // stamina in thousandths of a percent
     public final double[][] x = new double[2][NP], y = new double[2][NP], vx = new double[2][NP], vy = new double[2][NP];
-    public final double[][] ang = new double[2][NJ], angSpeed = new double[2][NJ];
-    public final int[] myTarget = new int[NJ], myStrength = new int[NJ], oppTarget = new int[NJ], oppStrength = new int[NJ];   // hundredths of a degree, percent
     public int rise, oppRise, sinceContact, sinceHit;
     public final boolean[] round = new boolean[2];
     public final int[][] apart = new int[2][6];
+    public final double[][] ang = new double[2][NJ];
+    public final int[] myTarget = new int[NJ], myStrength = new int[NJ], oppTarget = new int[NJ], oppStrength = new int[NJ];   // hundredths of a degree, percent
     public String initLine;
     public List<String> lines;
 
     public void init(String line) {
         initLine = line;
-        String[] q = line.split(" ");
-        me = Integer.parseInt(q[0]); opp = 1 - me; startDistance = Integer.parseInt(q[1]);
+        startDistance = Integer.parseInt(line.trim());
     }
 
     public void read(List<String> in) {
-        if (in.size() != 72) throw new IllegalStateException("expected 72 lines, got " + in.size());
+        if (in.size() != Game.INPUT_LINES) throw new IllegalStateException("expected " + Game.INPUT_LINES + " lines, got " + in.size());
         lines = in; turn++;
         int n = 0;
-        String[] q = in.get(n++).split(" ");
-        hp[me] = Integer.parseInt(q[0]); stamina[me] = Integer.parseInt(q[1]); hp[opp] = Integer.parseInt(q[2]); stamina[opp] = Integer.parseInt(q[3]);
-        q = in.get(n++).split(" ");
-        myMove = q[0]; myFrame = Integer.parseInt(q[1]); oppMove = q[2]; oppFrame = Integer.parseInt(q[3]);
-        for (int k = 0; k < 2; k++) {
-            int f = k == 0 ? me : opp;
-            for (int i = 0; i < NP; i++) {
-                q = in.get(n++).split(" ");
-                x[f][i] = Integer.parseInt(q[0]) / 1000.0; y[f][i] = Integer.parseInt(q[1]) / 1000.0;
-                vx[f][i] = Integer.parseInt(q[2]) / 1000.0; vy[f][i] = Integer.parseInt(q[3]) / 1000.0;
+        for (int f = 0; f < 2; f++) {
+            String[] q = in.get(n++).split(" ");
+            hp[f] = Integer.parseInt(q[0]); stamina[f] = Integer.parseInt(q[1]); round[f] = q[5].equals("1");
+            if (f == me) { myMove = q[2]; myFrame = Integer.parseInt(q[3]); rise = Integer.parseInt(q[4]); }
+            else { oppMove = q[2]; oppFrame = Integer.parseInt(q[3]); oppRise = Integer.parseInt(q[4]); }
+        }
+        String[] p = in.get(n++).split(" ");                // the 38 points on one line, Game.PER_POINT values each
+        if (p.length != 2 * NP * Game.PER_POINT) throw new IllegalStateException("expected " + 2 * NP * Game.PER_POINT + " values on the line of the points, got " + p.length);
+        for (int f = 0; f < 2; f++) for (int i = 0; i < NP; i++) {
+            int b = Game.PER_POINT * (f * NP + i), j = Game.JOINT_AT[i], k = Game.STRIKER_AT[i];
+            x[f][i] = (Integer.parseInt(p[b]) - Game.XOFF) / 1000.0; y[f][i] = (Game.YTOP - Integer.parseInt(p[b + 1])) / 1000.0;
+            vx[f][i] = Integer.parseInt(p[b + 2]) / 1000.0; vy[f][i] = -Integer.parseInt(p[b + 3]) / 1000.0;
+            if (k >= 0) apart[f][k] = Integer.parseInt(p[b + 4]);
+            if (j >= 0) {
+                ang[f][j] = Double.parseDouble(p[b + 5]);
+                int t = (int) Math.rint(Double.parseDouble(p[b + 6]) * 100), st = Integer.parseInt(p[b + 7]);
+                if (f == me) { myTarget[j] = t; myStrength[j] = st; } else { oppTarget[j] = t; oppStrength[j] = st; }
             }
         }
-        for (int j = 0; j < NJ; j++) {
-            q = in.get(n++).split(" ");
-            ang[me][j] = Double.parseDouble(q[0]); angSpeed[me][j] = Integer.parseInt(q[1]);
-            myTarget[j] = (int) Math.rint(Double.parseDouble(q[2]) * 100); myStrength[j] = Integer.parseInt(q[3]);
-        }
-        for (int j = 0; j < NJ; j++) {
-            q = in.get(n++).split(" ");
-            ang[opp][j] = Double.parseDouble(q[0]); angSpeed[opp][j] = Integer.parseInt(q[1]);
-            oppTarget[j] = (int) Math.rint(Double.parseDouble(q[2]) * 100); oppStrength[j] = Integer.parseInt(q[3]);
-        }
-        q = in.get(n++).split(" ");
-        rise = Integer.parseInt(q[0]); oppRise = Integer.parseInt(q[1]); round[me] = q[2].equals("1"); round[opp] = q[3].equals("1");
-        sinceContact = Integer.parseInt(q[4]); sinceHit = Integer.parseInt(q[5]);
-        q = in.get(n).split(" ");
-        for (int k = 0; k < 2; k++) for (int i = 0; i < 6; i++) apart[k == 0 ? me : opp][i] = Integer.parseInt(q[6 * k + i]);
+        String[] q = in.get(n).split(" ");
+        sinceContact = Integer.parseInt(q[0]); sinceHit = Integer.parseInt(q[1]);
     }
 
     public double dist() { return Math.abs(x[me][Physics.PELVIS] - x[opp][Physics.PELVIS]); }

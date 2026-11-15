@@ -15,7 +15,7 @@ public final class Arena {
         public boolean stamina = true, joints = true;
         public long[] botSeed;                 // null: seed * 31 + 1 and seed * 31 + 2
         public boolean checkSim, checkMirror, film;
-        /** To prove that the checks can fail: 1 = the copy is given a hip target wrong by a hundredth of a degree, 2 = the copy is not given the opponent's motors, 3 = the mirror match is not given the swapped commands. */
+        /** To prove that the checks can fail: 1 = the copy is given a back target wrong by a hundredth of a degree, 2 = the copy is not given the opponent's command, 3 = the mirror match is not given the swapped commands. */
         public int sabotage;
         public int maxTurns = Game.MAX_TURNS;
         public String[][] scripts = {{}, {}};
@@ -27,7 +27,7 @@ public final class Arena {
     }
 
     public static final class Result {
-        public String a, b, end = "time", invalid = "";
+        public String a, b, end = "time", invalid = "", warnings = "";
         public int winner = -1, turns, dist, firstContact = -1, firstHit = -1, resets, farTurns;
         public long seed;
         public final int[] hp = new int[2], hpHit = new int[2], hpFall = new int[2], falls = new int[2], outs = new int[2], freeFalls = new int[2], recoveries = new int[2], recChains = new int[2];
@@ -36,7 +36,7 @@ public final class Arena {
         public final int[] hits = new int[2], blocked = new int[2]; public final int[][] hitsOn = new int[2][Physics.KNAME.length];
         public final long[] botNanos = new long[2], botMax = new long[2];
         public final StringBuilder evlog = new StringBuilder();
-        public int simChecks, simBad, mirrorBad; public String simFirst = "", mirrorFirst = "";
+        public int simChecks, simBad, mirrorBad, negative; public String simFirst = "", mirrorFirst = "", negativeFirst = "";
         public final List<int[][]> film = new ArrayList<int[][]>();
         /** Every fall: {turn, fighter, 1 for a ring-out, 1 when free, HP it lost to hits in the window, HP it took from the other, turns since the last contact, turns since its last recovery step started, 1 when it was in a recovery step}. */
         public final List<int[]> fallLog = new ArrayList<int[]>();
@@ -55,7 +55,7 @@ public final class Arena {
         Game g = new Game(dist, opt.stamina, opt.joints);
         Game mir = opt.checkMirror ? new Game(dist, opt.stamina, opt.joints) : null;
         Obs[] obs = {new Obs(), new Obs()};
-        for (int p = 0; p < 2; p++) obs[p].init(g.initLine(p));
+        for (int p = 0; p < 2; p++) { obs[p].init(g.initLine(p)); obs[p].side = p; }
         int[][] took = new int[opt.maxTurns + 1][2];
         int lastContact = -100;
         int[] recStart = {-100, -100};
@@ -76,6 +76,7 @@ public final class Arena {
                 cmd[p] = c;
             }
             String e0 = g.apply(0, cmd[0]), e1 = g.apply(1, cmd[1]);
+            for (int p = 0; p < 2; p++) if (g.warning[p] != null && r.warnings.length() < 400) r.warnings += "t" + t + " " + SIDE[p] + ": " + g.warning[p] + "; ";
             if (e0 != null || e1 != null) {           // an invalid output loses at once; both: a draw
                 r.end = "invalid"; r.winner = e0 != null && e1 != null ? -1 : e0 != null ? 1 : 0;
                 r.invalid = (e0 != null ? "L: " + e0 + " " : "") + (e1 != null ? "R: " + e1 : "");
@@ -122,15 +123,21 @@ public final class Arena {
             if (g.stoodUp) { r.resets++; lastContact = -100; recStart[0] = recStart[1] = -100; for (int u = 0; u <= t; u++) took[u][0] = took[u][1] = 0; }
             if (Math.abs(w.px[Physics.PELVIS] - w.px[Physics.NP + Physics.PELVIS]) > 1.3) r.farTurns++;
             for (int f = 0; f < 2; f++) if (g.stamina[f] < r.minStamina[f]) r.minStamina[f] = g.stamina[f];
-            // ---- a copy rebuilt from what each player read, given both commands, must predict the next input exactly
+            // ---- a copy rebuilt from what each player read, given both commands, must predict the next input exactly.
+            // In the copy, the player is fighter 0, on the left, as the input shows it.
             if (opt.checkSim) for (int p = 0; p < 2; p++) {
                 Game c = Game.fromInput(g.initLine(p), in.get(p), opt.stamina, opt.joints);
                 c.turn = t;
-                String e = c.apply(p, cmd[p]);
-                if (opt.sabotage != 2) { String e2 = c.apply(1 - p, cmd[1 - p]); if (e == null) e = e2; }
-                if (opt.sabotage == 1) c.target[1 - p][Physics.UB] += 1;
+                String e = c.apply(0, cmd[p]);
+                if (opt.sabotage != 2) { String e2 = c.apply(1, cmd[1 - p]); if (e == null) e = e2; }
+                if (opt.sabotage == 1) c.target[1][Physics.UB] += 1;
                 c.simulate();
-                List<String> want = g.inputLines(p), got = c.inputLines(p);
+                List<String> want = g.inputLines(p), got = c.inputLines(0);
+                String[] pts = want.get(2).split(" ");
+                for (int i = 0; i < 2 * Physics.NP; i++) {      // every coordinate of the input is 0 or more: the origin is at the top left
+                    int b = Game.PER_POINT * i;
+                    if (Integer.parseInt(pts[b]) < 0 || Integer.parseInt(pts[b + 1]) < 0) { r.negative++; if (r.negativeFirst.isEmpty()) r.negativeFirst = "t" + t + " player " + p + " point " + i + ": " + pts[b] + " " + pts[b + 1]; }
+                }
                 r.simChecks++;
                 if (e != null || !want.equals(got)) {
                     r.simBad++;

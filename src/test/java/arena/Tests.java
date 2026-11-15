@@ -44,40 +44,44 @@ public final class Tests {
         for (String l : new String[]{ok, "JAB", "WAIT"}) run1(l, 3, o);
     }
     // ---------- LOOK is cosmetic: it never costs the match. Each case: the line, first turn or not, JOINTS allowed, expected error (null: accepted),
-    // expected type, move, skin and hair (-1: the look is not changed)
+    // expected type, move, skin and hair (-1: the look is not changed), and how the warning shown in the console starts (null: no warning)
     static void look() {
+        String first = "LOOK is ignored: the look is chosen on the first turn only", values = "LOOK is ignored: it takes a skin";
         Object[][] cases = {
-            {"LOOK 3 5 JAB", true, true, null, Command.MOVE, Moves.JAB, 3, 5},
-            {"LOOK 3 5", true, true, null, Command.WAIT, Moves.NONE, 3, 5},
-            {"LOOK 7 9 STEP_FORWARD", true, true, null, Command.MOVE, Moves.STEP_FORWARD, 7, 9},
-            {"LOOK 0 0 GUARD", true, true, null, Command.MOVE, Moves.GUARD, 0, 0},
-            {"LOOK 8 5 JAB", true, true, null, Command.MOVE, Moves.JAB, -1, -1},          // skins go from 0 to 7
-            {"LOOK 3 10 JAB", true, true, null, Command.MOVE, Moves.JAB, -1, -1},         // hairs go from 0 to 9
-            {"LOOK 99 99 JAB", true, true, null, Command.MOVE, Moves.JAB, -1, -1},
-            {"LOOK -1 5 JAB", true, true, null, Command.MOVE, Moves.JAB, -1, -1},
-            {"LOOK 3.0 3 JAB", true, true, null, Command.MOVE, Moves.JAB, -1, -1},
-            {"LOOK 3 JAB", true, true, null, Command.MOVE, Moves.JAB, -1, -1},
-            {"LOOK JAB", true, true, null, Command.MOVE, Moves.JAB, -1, -1},
-            {"LOOK", true, true, null, Command.WAIT, Moves.NONE, -1, -1},
-            {"LOOK 3 5 JAB", false, true, null, Command.MOVE, Moves.JAB, -1, -1},         // a later turn: the look stays as it is
-            {"LOOK 3 5", false, true, null, Command.WAIT, Moves.NONE, -1, -1},
-            {"LOOK 3 5 JAB hello there", false, true, null, Command.MOVE, Moves.JAB, -1, -1},
-            {"LOOK 3 5 " + "JOINTS" + rep(" 10 50", NJ), false, true, null, Command.JOINTS, Moves.NONE, -1, -1},
-            {"LOOK 3 5 " + "JOINTS" + rep(" 10 50", NJ), true, false, "JOINTS is not available in this league", 0, 0, 0, 0},   // the command itself stays strict
-            {"look 3 5 JAB", true, true, "unknown command: look", 0, 0, 0, 0},
-            {"LOOK a b", true, true, "unknown command: a", 0, 0, 0, 0},
-            {"LOOK 3 5 hello", false, true, "unknown command: hello", 0, 0, 0, 0},
-            {"LOOK 3 5 LOOK 2 2", true, true, "unknown command: LOOK", 0, 0, 0, 0},
+            {"LOOK 3 5 JAB", true, true, null, Command.MOVE, Moves.JAB, 3, 5, null},
+            {"LOOK 3 5", true, true, null, Command.WAIT, Moves.NONE, 3, 5, null},
+            {"LOOK 7 9 STEP_FORWARD", true, true, null, Command.MOVE, Moves.STEP_FORWARD, 7, 9, null},
+            {"LOOK 0 0 GUARD", true, true, null, Command.MOVE, Moves.GUARD, 0, 0, null},
+            {"LOOK 8 5 JAB", true, true, null, Command.MOVE, Moves.JAB, -1, -1, values},          // skins go from 0 to 7
+            {"LOOK 3 10 JAB", true, true, null, Command.MOVE, Moves.JAB, -1, -1, values},         // hairs go from 0 to 9
+            {"LOOK 99 99 JAB", true, true, null, Command.MOVE, Moves.JAB, -1, -1, values},
+            {"LOOK -1 5 JAB", true, true, null, Command.MOVE, Moves.JAB, -1, -1, values},
+            {"LOOK 3.0 3 JAB", true, true, null, Command.MOVE, Moves.JAB, -1, -1, values},
+            {"LOOK 3 JAB", true, true, null, Command.MOVE, Moves.JAB, -1, -1, values},
+            {"LOOK JAB", true, true, null, Command.MOVE, Moves.JAB, -1, -1, values},
+            {"LOOK", true, true, null, Command.WAIT, Moves.NONE, -1, -1, values},
+            {"LOOK 3 5 JAB", false, true, null, Command.MOVE, Moves.JAB, -1, -1, first},         // a later turn: the look stays as it is
+            {"LOOK 3 5", false, true, null, Command.WAIT, Moves.NONE, -1, -1, first},
+            {"LOOK 3 5 JAB hello there", false, true, null, Command.MOVE, Moves.JAB, -1, -1, first},
+            {"LOOK 3 5 " + "JOINTS" + rep(" 10 50", NJ), false, true, null, Command.JOINTS, Moves.NONE, -1, -1, first},
+            // JOINTS where it is not available: recognized, so not played but not eliminated either: WAIT, and the look is still set
+            {"LOOK 3 5 " + "JOINTS" + rep(" 10 50", NJ), true, false, null, Command.WAIT, Moves.NONE, 3, 5, "JOINTS is not available in this league: WAIT is played instead"},
+            {"look 3 5 JAB", true, true, "unknown command: look", 0, 0, 0, 0, null},
+            {"LOOK a b", true, true, "unknown command: a", 0, 0, 0, 0, null},
+            {"LOOK 3 5 hello", false, true, "unknown command: hello", 0, 0, 0, 0, null},
+            {"LOOK 3 5 LOOK 2 2", true, true, "unknown command: LOOK", 0, 0, 0, 0, null},
         };
         int bad = 0;
         for (Object[] k : cases) {
             Command c = Command.parse((String) k[0], (Boolean) k[1], (Boolean) k[2]);
             String want = (String) k[3];
+            String warn = (String) k[8];
             boolean ok = want == null ? c.error == null && c.type == (Integer) k[4] && c.move == (Integer) k[5] && c.skin == (Integer) k[6] && c.hair == (Integer) k[7]
+                                        && (warn == null ? c.warning == null : c.warning != null && c.warning.startsWith(warn))
                                       : want.equals(c.error);
             if (!ok) bad++;
             System.out.printf("  %-4s %-40s first turn %-5s -> %s%n", ok ? "ok" : "BAD", "\"" + cut((String) k[0], 38) + "\"", k[1],
-                c.error != null ? "refused: " + c.error : "type " + c.type + ", move " + (c.move >= 0 ? Moves.NAME[c.move] : "-") + ", look " + c.skin + " " + c.hair + (c.message.isEmpty() ? "" : ", message \"" + c.message + "\""));
+                c.error != null ? "refused: " + c.error : "type " + c.type + ", move " + (c.move >= 0 ? Moves.NAME[c.move] : "-") + ", look " + c.skin + " " + c.hair + (c.message.isEmpty() ? "" : ", message \"" + c.message + "\"") + (c.warning == null ? "" : ", console: " + c.warning));
         }
         // through the engine: a look sent on the first turn stays for the whole match; later LOOKs change nothing and cost nothing
         Game g = new Game(2000, true, true);
@@ -104,7 +108,7 @@ public final class Tests {
             Arena.Result r = Arena.play("Script", "Idle", 2000, 1, o);
             boolean bad = false;
             for (int i = 0; i < Physics.N; i++) if (Double.isNaN(r.last.w.px[i]) || Double.isNaN(r.last.w.py[i])) bad = true;
-            System.out.printf("  turn %d %-62s -> %s%s%n", at, "\"" + show + "\"", r.end.equals("invalid") ? "REFUSED, the bot loses (" + r.invalid.trim() + ")" : "accepted" + (r.last.message[0].isEmpty() ? "" : ", message \"" + cut(r.last.message[0], 50) + "\""), bad ? ", STATE IS NaN" : "");
+            System.out.printf("  turn %d %-62s -> %s%s%n", at, "\"" + show + "\"", r.end.equals("invalid") ? "REFUSED, the bot loses (" + r.invalid.trim() + ")" : "accepted" + (r.last.message[0].isEmpty() ? "" : ", message \"" + cut(r.last.message[0], 50) + "\"") + (r.warnings.isEmpty() ? "" : ", console: " + cut(r.warnings.trim(), 140)), bad ? ", STATE IS NaN" : "");
         } catch (Throwable t) {
             System.out.printf("  turn %d %-62s -> REFEREE THROWS %s: %s%n", at, "\"" + show + "\"", t.getClass().getSimpleName(), String.valueOf(t.getMessage()).replaceAll("\\s+", " "));
         }
@@ -142,22 +146,23 @@ public final class Tests {
         String[][] pairs = {{"Mixed", "Kicker"}, {"Boxer", "Brawler"}, {"Smart", "Ducker"}, {"Flailer", "Rusher"}, {"Jumper", "Backer"}, {"Counter", "Mixed"}, {"Flailer", "Flailer"}, {"Turtle", "Rusher"},
             {"S:20:6:0:1:1", "Mixed"}, {"S:20:6:0:1:1", "S:20:6:0:1:1"}, {"Fling:8", "Kicker"}, {"Fling:12", "Boxer"}, {"Round:Mixed", "Kicker"}, {"Raw:Kicker", "Raw:Boxer"}, {"SLead:FLOP", "Mixed"}, {"Hold:DUCK", "Idle"},
             {"Limp", "Rusher"}, {"Hold:RELAX", "Jumper"}};
-        long checks = 0, simBad = 0, mirBad = 0, turns = 0;
+        long checks = 0, simBad = 0, mirBad = 0, turns = 0, negative = 0;
         for (final String[] pr : pairs) {
             final Arena.Opt o = opt(); o.checkSim = o.checkMirror = true;
             List<Integer> ks = new ArrayList<Integer>();
             for (int k = 0; k < n; k++) ks.add(k);
             List<Arena.Result> rs = ks.parallelStream().map(k -> Arena.play(k % 2 == 0 ? pr[0] : pr[1], k % 2 == 0 ? pr[1] : pr[0], 0, 1000 + k, o.copy())).collect(Collectors.toList());
-            long c = 0, sb = 0, mb = 0, tn = 0, falls = 0, hits = 0; String first = "";
+            long c = 0, sb = 0, mb = 0, tn = 0, falls = 0, hits = 0, neg = 0; String first = "";
             for (Arena.Result r : rs) {
-                c += r.simChecks; sb += r.simBad; mb += r.mirrorBad; tn += r.turns; falls += r.falls[0] + r.falls[1] + r.outs[0] + r.outs[1]; hits += r.hpHit[0] + r.hpHit[1];
+                c += r.simChecks; sb += r.simBad; mb += r.mirrorBad; tn += r.turns; falls += r.falls[0] + r.falls[1] + r.outs[0] + r.outs[1]; hits += r.hpHit[0] + r.hpHit[1]; neg += r.negative;
                 if (first.isEmpty() && r.simBad > 0) first = " | first copy error: " + r.simFirst;
                 if (first.isEmpty() && r.mirrorBad > 0) first = " | first mirror error: " + r.mirrorFirst;
+                if (first.isEmpty() && r.negative > 0) first = " | first negative coordinate: " + r.negativeFirst;
             }
-            System.out.printf("  %-14s vs %-14s %d matches, %5d turns, %3d falls, %4d HP of hits: copy wrong %d of %d, mirror wrong %d of %d turns%s%n", pr[0], pr[1], n, tn, falls, hits, sb, c, mb, tn, first);
-            checks += c; simBad += sb; mirBad += mb; turns += tn;
+            System.out.printf("  %-14s vs %-14s %d matches, %5d turns, %3d falls, %4d HP of hits: copy wrong %d of %d, mirror wrong %d of %d turns, negative coordinates %d%s%n", pr[0], pr[1], n, tn, falls, hits, sb, c, mb, tn, neg, first);
+            checks += c; simBad += sb; mirBad += mb; turns += tn; negative += neg;
         }
-        System.out.printf("  total: %d turns; rebuilt copy wrong %d of %d predictions; mirrored match wrong on %d of %d turns%n", turns, simBad, checks, mirBad, turns);
+        System.out.printf("  total: %d turns; rebuilt copy wrong %d of %d predictions; mirrored match wrong on %d of %d turns; negative coordinates in the input %d%n", turns, simBad, checks, mirBad, turns, negative);
     }
 
     // ---------- the same bot on both sides with the same seed: the match must be its own mirror image, so a draw

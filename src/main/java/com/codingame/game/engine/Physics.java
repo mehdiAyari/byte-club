@@ -107,6 +107,8 @@ public final class Physics {
     final boolean[] wasTouch = new boolean[N];
     public final double[][] target = new double[2][NJ], strength = new double[2][NJ];      // degrees; 0..1
     public final int[] hp = {100, 100};
+    /** HP taken by the strikes of this turn: the strikes are found at each step, and the HP are taken off at the end of the turn. */
+    public final int[] damage = new int[2];
     public final boolean[] down = new boolean[2], out = new boolean[2];
     public final int[] downPt = {-1, -1};                    // the first point other than a foot that touched the floor this turn
     public final int[] fallStep = {-1, -1};                  // the step of this turn at which the fighter went down or out
@@ -135,7 +137,7 @@ public final class Physics {
         System.arraycopy(o.touch, 0, touch, 0, N);
         for (int f = 0; f < 2; f++) {
             System.arraycopy(o.target[f], 0, target[f], 0, NJ); System.arraycopy(o.strength[f], 0, strength[f], 0, NJ);
-            hp[f] = o.hp[f]; fatigue[f] = o.fatigue[f]; roundLeg[f] = o.roundLeg[f];
+            hp[f] = o.hp[f]; damage[f] = o.damage[f]; fatigue[f] = o.fatigue[f]; roundLeg[f] = o.roundLeg[f];
             down[f] = o.down[f]; out[f] = o.out[f]; downPt[f] = o.downPt[f]; fallStep[f] = o.fallStep[f]; blockedBy[f] = o.blockedBy[f];
         }
         System.arraycopy(o.apart, 0, apart, 0, apart.length);
@@ -363,7 +365,7 @@ public final class Physics {
             }
             for (int q = 0; q < 2 * NS; q++) if (bestHit[q] > 0) {
                 int att = q < NS ? 0 : 1, sh = q % NS, dmg = (int) Math.floor(bestHit[q] + 0.5);
-                hp[1 - att] -= dmg;
+                damage[1 - att] += dmg;
                 if (record) hitEvents.add(new double[]{stepNo, att, sh, bestTarget[q], bestSpeed[q], dmg, bestCX[q], bestCY[q]});
             }
         }
@@ -480,6 +482,7 @@ public final class Physics {
         down[0] = down[1] = out[0] = out[1] = false;
         downPt[0] = downPt[1] = -1; fallStep[0] = fallStep[1] = -1;
         blockedBy[0] = blockedBy[1] = 0;
+        damage[0] = damage[1] = 0;
         contactSteps = 0; stepNo = 0;
         hitEvents.clear();
         blockEvents.clear();

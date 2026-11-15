@@ -152,7 +152,7 @@ public final class Bots {
             }
         };
         if (name.equals("Script")) return new Bot(name) {         // plays opt.scripts[side], then STANCE
-            public String act(Obs o) { String[] sc = opt.scripts[o.me]; return o.turn < sc.length ? sc[o.turn] : "STANCE"; }
+            public String act(Obs o) { String[] sc = opt.scripts[o.side]; return o.turn < sc.length ? sc[o.turn] : "STANCE"; }
         };
         if (name.equals("Limp")) return new Bot(name) {           // guards; close to the opponent and with no hit in the window, lets every muscle go
             public String act(Obs o) { return o.dist() < LIMP_D && o.sinceHit > Game.WINDOW ? ZERO : "GUARD"; }

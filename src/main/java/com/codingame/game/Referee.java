@@ -33,6 +33,14 @@ public class Referee extends AbstractReferee {
 
     @Override
     public void init() {
+        try {
+            start();
+        } catch (Exception e) {
+            e.printStackTrace();            // the first turn then fails too, and gameTurn ends the match as a draw
+        }
+    }
+
+    private void start() {
         int league = gameManager.getLeagueLevel();
         int distance = Game.DISTANCE_MIN + 2 * gameManager.getRandom().nextInt((Game.DISTANCE_MAX - Game.DISTANCE_MIN) / 2 + 1);
         Properties params = gameManager.getGameParameters();
@@ -53,10 +61,29 @@ public class Referee extends AbstractReferee {
         gameManager.setFrameDuration(FRAME_MS);
     }
 
+    /** For the test bench only: -Dbyteclub.failAt=N makes the referee throw on turn N, to check that an error ends the match cleanly. */
+    static final int FAIL_AT = Integer.getInteger("byteclub.failAt", -1);
+    private boolean internalError;
+
     @Override
     public void gameTurn(int turn) {
+        try {
+            playTurn();
+        } catch (Exception e) {
+            // the referee must never crash: an error of the referee ends the match as a draw, and the players lose nothing
+            e.printStackTrace();
+            internalError = true;
+            say(GameManager.formatErrorMessage("Internal error of the referee: the match stops here, as a draw."));
+            for (Player p : gameManager.getPlayers()) if (p.isActive()) p.setScore(0);
+            try { view.error(); } catch (Exception e2) { e2.printStackTrace(); }
+            gameManager.endGame();
+        }
+    }
+
+    private void playTurn() {
         summaryLeft = SUMMARY_MAX;
         boolean first = game.turn == 0;
+        if (game.turn == FAIL_AT) throw new IllegalStateException("test of an error of the referee on turn " + FAIL_AT);
         for (Player p : gameManager.getPlayers()) {
             int i = p.getIndex();
             if (first) p.sendInputLine(game.initLine(i));
@@ -71,6 +98,8 @@ public class Referee extends AbstractReferee {
             } catch (TimeoutException e) {
                 lost[i] = "no command received within " + (first ? FIRST_TURN_MS : TURN_MS) + " ms";
             }
+            // a recognized command that was not played as written: the reason goes to the console, the player is not eliminated
+            if (lost[i] == null && game.warning[i] != null) say(GameManager.formatErrorMessage(p.getNicknameToken() + ": " + game.warning[i] + "."));
         }
         if (lost[0] != null || lost[1] != null) {         // an invalid command or a timeout loses the match at once; both: a draw
             for (Player p : gameManager.getPlayers()) {
@@ -94,12 +123,13 @@ public class Referee extends AbstractReferee {
         for (Player p : gameManager.getPlayers()) p.setScore(game.score(p.getIndex()));
         if (game.over()) {
             int w = game.winner();
-            boolean ko = game.w.hp[0] <= 0 || game.w.hp[1] <= 0;
-            view.end(w, ko);
-            if (w < 0) say(ko ? "Double knockout: a draw." : "Time. A draw: " + game.score(0) + " HP each.");
+            boolean ko = game.w.hp[0] <= 0 || game.w.hp[1] <= 0, stale = !ko && game.stale();
+            view.end(w, ko ? FightModule.END_KO : stale ? FightModule.END_STALE : FightModule.END_TIME);
+            String why = stale ? "No contact for " + Game.STALE + " turns." : "Time.";
+            if (w < 0) say(ko ? "Double knockout: a draw." : why + " A draw: " + game.score(0) + " HP each.");
             else {
                 Player p = gameManager.getPlayer(w);
-                String how = ko ? p.getNicknameToken() + " wins by knockout." : "Time. " + p.getNicknameToken() + " wins with " + game.score(w) + " HP against " + game.score(1 - w) + ".";
+                String how = ko ? p.getNicknameToken() + " wins by knockout." : why + " " + p.getNicknameToken() + " wins with " + game.score(w) + " HP against " + game.score(1 - w) + ".";
                 say(GameManager.formatSuccessMessage(how));
                 if (ko) gameManager.addTooltip(p, how);
             }
@@ -138,13 +168,17 @@ public class Referee extends AbstractReferee {
 
     @Override
     public void onEnd() {
-        int[] scores = new int[2];
-        String[] texts = new String[2];
-        for (Player p : gameManager.getPlayers()) {
-            int i = p.getIndex();
-            scores[i] = p.getScore();
-            texts[i] = lost[i] != null ? "eliminated" : scores[i] + " HP";
+        try {
+            int[] scores = new int[2];
+            String[] texts = new String[2];
+            for (Player p : gameManager.getPlayers()) {
+                int i = p.getIndex();
+                scores[i] = p.getScore();
+                texts[i] = lost[i] != null ? "eliminated" : internalError ? "draw" : scores[i] + " HP";
+            }
+            endScreen.setScores(scores, texts);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        endScreen.setScores(scores, texts);
     }
 }

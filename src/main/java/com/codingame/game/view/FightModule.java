@@ -120,16 +120,25 @@ public class FightModule implements Module {
         if (firstTurn) frame.put("l", new int[][]{g.look[0].clone(), g.look[1].clone()});
     }
 
-    /** The match ends with the turn that was just given. */
-    public void end(int winner, boolean knockout) {
-        frame.put("x", new int[]{winner, knockout ? 1 : 0});
+    /** How a match ends, as the viewer reads it. */
+    public static final int END_TIME = 0, END_KO = 1, END_ELIMINATED = 2, END_STALE = 3, END_ERROR = 4;
+
+    /** The match ends with the turn that was just given: END_TIME, END_KO or END_STALE. */
+    public void end(int winner, int how) {
+        frame.put("x", new int[]{winner, how});
+    }
+
+    /** The referee met an error: the match stops, as a draw. */
+    public void error() {
+        if (frame == null) frame = new LinkedHashMap<>();       // the error may come before anything of this turn was given to the viewer
+        frame.put("x", new int[]{-1, END_ERROR});
     }
 
     /** The match stops before the turn is played: a player sent an invalid command or nothing. */
     public void stopped(Game g, int winner) {
         frame = new LinkedHashMap<>();
         frame.put("h", new int[]{g.w.hp[0], g.w.hp[1]});
-        frame.put("x", new int[]{winner, 2});
+        frame.put("x", new int[]{winner, END_ELIMINATED});
     }
 
     @Override

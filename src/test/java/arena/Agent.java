@@ -1,5 +1,6 @@
 package arena;
 
+import com.codingame.game.engine.Game;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -36,8 +37,8 @@ public final class Agent {
         if (first == null) return;
         obs.init(first);
         while (true) {
-            List<String> lines = new ArrayList<String>(72);
-            for (int i = 0; i < 72; i++) {
+            List<String> lines = new ArrayList<String>(Game.INPUT_LINES);
+            for (int i = 0; i < Game.INPUT_LINES; i++) {
                 String s = in.readLine();
                 if (s == null) return;
                 lines.add(s);

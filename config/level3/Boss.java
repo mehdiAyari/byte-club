@@ -8,11 +8,14 @@ import java.util.Random;
  */
 class Player {
     static final int LEVEL = 3;
-    static final int NP = 19, NJ = 15, HEAD = 0, NECK = 1, PELVIS = 4, LHAND = 7, RHAND = 10, LANK = 12, LHEEL = 13, LTOE = 14, RANK = 16, RHEEL = 17;
+    static final int NP = 19, HEAD = 0, NECK = 1, PELVIS = 4, LHAND = 7, RHAND = 10, LANK = 12, LHEEL = 13, LTOE = 14, RANK = 16, RHEEL = 17;
     static final double[] MASS = {5, 6, 9, 9, 12, 2, 1.5, 1.2, 2, 1.5, 1.2, 4, 2, 0.5, 1, 4, 2, 0.5, 1};
     static final double RING = 3.0, ANKLE_Y = 0.09;
+    /** The frame of the input: the centre of the ring is at x = XOFF, the floor at y = YTOP, and y grows downward (mm). */
+    static final int XOFF = 5000, YTOP = 3000;
 
-    int me, opp, turn = -1, rest = 0;
+    final int me = 0, opp = 1;                // the input shows the match from the left: the boss is always fighter 0
+    int turn = -1, rest = 0;
     String myMove = "STANCE";
     int myStamina = 100000;
     final double[][] x = new double[2][NP], y = new double[2][NP], vx = new double[2][NP];
@@ -22,8 +25,7 @@ class Player {
     public static void main(String[] args) throws Exception {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         Player p = new Player();
-        String[] q = in.readLine().trim().split(" ");
-        p.me = Integer.parseInt(q[0]); p.opp = 1 - p.me;
+        in.readLine();                            // the distance at the start: not used by this boss
         while (true) {
             String first = in.readLine();
             if (first == null) return;
@@ -35,18 +37,16 @@ class Player {
 
     void read(String first, BufferedReader in) throws Exception {
         turn++;
-        String[] q = first.trim().split(" ");
-        myStamina = Integer.parseInt(q[1]);
-        q = in.readLine().trim().split(" ");
-        myMove = q[0];
-        for (int k = 0; k < 2; k++) {
-            int f = k == 0 ? me : opp;
-            for (int i = 0; i < NP; i++) {
-                q = in.readLine().trim().split(" ");
-                x[f][i] = Integer.parseInt(q[0]) / 1000.0; y[f][i] = Integer.parseInt(q[1]) / 1000.0; vx[f][i] = Integer.parseInt(q[2]) / 1000.0;
-            }
+        String[] q = first.trim().split(" ");                // my line: hp stamina moveName frame rise roundKick
+        myStamina = Integer.parseInt(q[1]); myMove = q[2];
+        in.readLine();                                       // the opponent's line: not used by this boss
+        q = in.readLine().trim().split(" ");                 // the 38 points on one line, 8 values each: x y vx vy apart angle target strength
+        for (int f = 0; f < 2; f++) for (int i = 0; i < NP; i++) {
+            int b = 8 * (f * NP + i);
+            // back to metres from the centre of the ring, with y up from the floor
+            x[f][i] = (Integer.parseInt(q[b]) - XOFF) / 1000.0; y[f][i] = (YTOP - Integer.parseInt(q[b + 1])) / 1000.0; vx[f][i] = Integer.parseInt(q[b + 2]) / 1000.0;
         }
-        for (int i = 0; i < 2 * NJ + 2; i++) in.readLine();     // the joints, then the last two lines: not used by this boss
+        in.readLine();                                       // sinceContact sinceHit: not used by this boss
     }
 
     double dist() { return Math.abs(x[me][PELVIS] - x[opp][PELVIS]); }
