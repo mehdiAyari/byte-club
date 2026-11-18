@@ -28,15 +28,15 @@
 
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">The ring</h3>
 <ul>
-  <li>Side view, in millimetres. The origin is at the top left of the scene: <var>x</var> grows to the right, <var>y</var> grows downward, and the floor is at <var>y</var> = <const>3000</const>.</li>
-  <li>The ring is 6 m wide: from <var>x</var> = <const>2000</const> to <var>x</var> = <const>8000</const>. Its centre is at <var>x</var> = <const>5000</const>.</li>
-  <li><strong>Each player sees the match from the left</strong>: in its input, its own fighter stands on the left and faces right. The fighter on the right reads the scene mirrored (<var>x</var> becomes 10000 &minus; <var>x</var>, <var>vx</var> becomes &minus;<var>vx</var>). Commands mean the same on both sides.</li>
-  <li>Both fighters start in STANCE, at rest, <var>startDistance</var> apart, pelvis to pelvis (<const>1600</const> to <const>2400</const>, an even number, drawn at random), on either side of the centre. A fighter faces the same way for the whole match.</li>
+  <li>The ring is shown in a side view, with all coordinates expressed in millimetres. The origin is at the top left of the scene: <var>x</var> grows to the right, <var>y</var> grows downward, and the floor is at <var>y</var> = <const>3000</const>.</li>
+  <li>The ring is <const>6</const> m wide: from <var>x</var> = <const>2000</const> to <var>x</var> = <const>8000</const>. Its centre is at <var>x</var> = <const>5000</const>.</li>
+  <li><strong>Each player sees the match from the left</strong>: in its input, its own fighter stands on the left and faces right. The fighter on the right reads the scene mirrored (<var>x</var> becomes <const>10000</const> &minus; <var>x</var>, <var>vx</var> becomes &minus;<var>vx</var>). Every command has the same effects relative to each player's perspective.</li>
+  <li>Both fighters start in <action>STANCE</action>, at rest, <var>startDistance</var> apart (<const>1600</const> to <const>2400</const>, an even number, drawn at random), on either side of the centre. A fighter faces the same way for the whole match.</li>
   <li>Each fighter starts with <const>100</const> HP.</li>
 </ul>
 
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">The fighter</h3>
-<p>A fighter is 19 points, 65.4 kg in all, joined by 20 rigid bones. Both fighters stand as two right-handed boxers face to face: LEAD is the side in front, REAR the other one.</p>
+<p>A fighter consists of <const>19</const> points connected by <const>20</const> rigid bones, with a total mass of <const>65.4</const> kg. Both fighters are right-handed boxers standing face-to-face. LEAD refers to the side in front, while REAR refers to the other side.</p>
 <div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794655631881/1bafa0923b79d39e3899b7ef88c461b9426426631168339d19f95097c718acb0.png" alt="The 19 points of a fighter, numbered, lead side in blue, rear side in orange" style="max-width: 100%; border-radius: 8px" /></div>
 <table style="border-collapse: collapse; margin: 8px 0">
   <tr><th style="padding: 2px 8px">#</th><th style="padding: 2px 8px">Point</th><th style="padding: 2px 8px">Mass (kg)</th><th style="padding: 2px 8px">Radius (mm)</th><th style="padding: 2px 8px">Joint that moves it</th></tr>
@@ -45,25 +45,51 @@
   <tr><td style="padding: 2px 8px">2</td><td style="padding: 2px 8px">CHEST</td><td style="padding: 2px 8px">9</td><td style="padding: 2px 8px">130</td><td style="padding: 2px 8px">2 LOWER_BACK</td></tr>
   <tr><td style="padding: 2px 8px">3</td><td style="padding: 2px 8px">WAIST</td><td style="padding: 2px 8px">9</td><td style="padding: 2px 8px">120</td><td style="padding: 2px 8px">none</td></tr>
   <tr><td style="padding: 2px 8px">4</td><td style="padding: 2px 8px">PELVIS (the hips)</td><td style="padding: 2px 8px">12</td><td style="padding: 2px 8px">130</td><td style="padding: 2px 8px">none</td></tr>
-  <tr><td style="padding: 2px 8px">5, 8</td><td style="padding: 2px 8px">LEAD_SHOULDER, REAR_SHOULDER</td><td style="padding: 2px 8px">2</td><td style="padding: 2px 8px">60</td><td style="padding: 2px 8px">3 LEAD_GIRDLE, 6 REAR_GIRDLE</td></tr>
-  <tr><td style="padding: 2px 8px">6, 9</td><td style="padding: 2px 8px">LEAD_ELBOW, REAR_ELBOW</td><td style="padding: 2px 8px">1.5</td><td style="padding: 2px 8px">50</td><td style="padding: 2px 8px">4 LEAD_SHOULDER, 7 REAR_SHOULDER</td></tr>
-  <tr><td style="padding: 2px 8px">7, 10</td><td style="padding: 2px 8px">LEAD_HAND, REAR_HAND</td><td style="padding: 2px 8px">1.2</td><td style="padding: 2px 8px">65</td><td style="padding: 2px 8px">5 LEAD_ELBOW, 8 REAR_ELBOW</td></tr>
-  <tr><td style="padding: 2px 8px">11, 15</td><td style="padding: 2px 8px">LEAD_KNEE, REAR_KNEE</td><td style="padding: 2px 8px">4</td><td style="padding: 2px 8px">80</td><td style="padding: 2px 8px">9 LEAD_HIP, 12 REAR_HIP</td></tr>
-  <tr><td style="padding: 2px 8px">12, 16</td><td style="padding: 2px 8px">LEAD_ANKLE, REAR_ANKLE</td><td style="padding: 2px 8px">2</td><td style="padding: 2px 8px">40</td><td style="padding: 2px 8px">10 LEAD_KNEE, 13 REAR_KNEE</td></tr>
-  <tr><td style="padding: 2px 8px">13, 17</td><td style="padding: 2px 8px">LEAD_HEEL, REAR_HEEL</td><td style="padding: 2px 8px">0.5</td><td style="padding: 2px 8px">30</td><td style="padding: 2px 8px">none</td></tr>
-  <tr><td style="padding: 2px 8px">14, 18</td><td style="padding: 2px 8px">LEAD_TOES, REAR_TOES</td><td style="padding: 2px 8px">1</td><td style="padding: 2px 8px">30</td><td style="padding: 2px 8px">11 LEAD_ANKLE, 14 REAR_ANKLE</td></tr>
+  <tr><td style="padding: 2px 8px">5</td><td style="padding: 2px 8px">LEAD_SHOULDER</td><td style="padding: 2px 8px">2</td><td style="padding: 2px 8px">60</td><td style="padding: 2px 8px">3 LEAD_GIRDLE</td></tr>
+  <tr><td style="padding: 2px 8px">6</td><td style="padding: 2px 8px">LEAD_ELBOW</td><td style="padding: 2px 8px">1.5</td><td style="padding: 2px 8px">50</td><td style="padding: 2px 8px">4 LEAD_SHOULDER</td></tr>
+  <tr><td style="padding: 2px 8px">7</td><td style="padding: 2px 8px">LEAD_HAND</td><td style="padding: 2px 8px">1.2</td><td style="padding: 2px 8px">65</td><td style="padding: 2px 8px">5 LEAD_ELBOW</td></tr>
+  <tr><td style="padding: 2px 8px">8</td><td style="padding: 2px 8px">REAR_SHOULDER</td><td style="padding: 2px 8px">2</td><td style="padding: 2px 8px">60</td><td style="padding: 2px 8px">6 REAR_GIRDLE</td></tr>
+  <tr><td style="padding: 2px 8px">9</td><td style="padding: 2px 8px">REAR_ELBOW</td><td style="padding: 2px 8px">1.5</td><td style="padding: 2px 8px">50</td><td style="padding: 2px 8px">7 REAR_SHOULDER</td></tr>
+  <tr><td style="padding: 2px 8px">10</td><td style="padding: 2px 8px">REAR_HAND</td><td style="padding: 2px 8px">1.2</td><td style="padding: 2px 8px">65</td><td style="padding: 2px 8px">8 REAR_ELBOW</td></tr>
+  <tr><td style="padding: 2px 8px">11</td><td style="padding: 2px 8px">LEAD_KNEE</td><td style="padding: 2px 8px">4</td><td style="padding: 2px 8px">80</td><td style="padding: 2px 8px">9 LEAD_HIP</td></tr>
+  <tr><td style="padding: 2px 8px">12</td><td style="padding: 2px 8px">LEAD_ANKLE</td><td style="padding: 2px 8px">2</td><td style="padding: 2px 8px">40</td><td style="padding: 2px 8px">10 LEAD_KNEE</td></tr>
+  <tr><td style="padding: 2px 8px">13</td><td style="padding: 2px 8px">LEAD_HEEL</td><td style="padding: 2px 8px">0.5</td><td style="padding: 2px 8px">30</td><td style="padding: 2px 8px">none</td></tr>
+  <tr><td style="padding: 2px 8px">14</td><td style="padding: 2px 8px">LEAD_TOES</td><td style="padding: 2px 8px">1</td><td style="padding: 2px 8px">30</td><td style="padding: 2px 8px">11 LEAD_ANKLE</td></tr>
+  <tr><td style="padding: 2px 8px">15</td><td style="padding: 2px 8px">REAR_KNEE</td><td style="padding: 2px 8px">4</td><td style="padding: 2px 8px">80</td><td style="padding: 2px 8px">12 REAR_HIP</td></tr>
+  <tr><td style="padding: 2px 8px">16</td><td style="padding: 2px 8px">REAR_ANKLE</td><td style="padding: 2px 8px">2</td><td style="padding: 2px 8px">40</td><td style="padding: 2px 8px">13 REAR_KNEE</td></tr>
+  <tr><td style="padding: 2px 8px">17</td><td style="padding: 2px 8px">REAR_HEEL</td><td style="padding: 2px 8px">0.5</td><td style="padding: 2px 8px">30</td><td style="padding: 2px 8px">none</td></tr>
+  <tr><td style="padding: 2px 8px">18</td><td style="padding: 2px 8px">REAR_TOES</td><td style="padding: 2px 8px">1</td><td style="padding: 2px 8px">30</td><td style="padding: 2px 8px">14 REAR_ANKLE</td></tr>
 </table>
 <ul>
-  <li>Bones, in mm: NECK&ndash;HEAD <const>200</const>, CHEST&ndash;NECK <const>180</const>, WAIST&ndash;CHEST <const>180</const>, PELVIS&ndash;WAIST <const>140</const>; for each arm NECK&ndash;SHOULDER <const>130</const>, SHOULDER&ndash;ELBOW <const>300</const>, ELBOW&ndash;HAND <const>280</const>; for each leg PELVIS&ndash;KNEE <const>450</const>, KNEE&ndash;ANKLE <const>450</const>, and the foot, a rigid triangle: the heel 50 mm behind and 60 mm below the ankle, the toes 170 mm in front and 60 mm below it.</li>
-  <li>A point touches the floor when it is closer to it than its radius. Standing flat, the heels and toes are 30 mm above the floor (<var>y</var> = <const>2970</const>).</li>
-  <li>Against the other fighter, a body is made of round shapes: the head (radius 110), the torso (capsules NECK&ndash;CHEST, CHEST&ndash;WAIST, WAIST&ndash;PELVIS of radius 130, 120, 130), the upper arms and forearms (50 and 45), the gloves (circles of radius 65 around the hands), the thighs and shins (80 and 50), the feet (capsules HEEL&ndash;TOES of radius 30) and the knees (circles of radius 75, which only strike). A fighter never collides with itself.</li>
+  <li>Each row of the table is one point, with its own mass and radius. Each joint turns exactly one bone, and is listed on the row of the point at the far end of that bone: for example, the joint LEAD_SHOULDER turns the upper arm around the point LEAD_SHOULDER, so it is on the row of the point LEAD_ELBOW.</li>
+  <li>Bones, in mm:
+    <ul>
+      <li>the spine: NECK&ndash;HEAD <const>200</const>, CHEST&ndash;NECK <const>180</const>, WAIST&ndash;CHEST <const>180</const>, PELVIS&ndash;WAIST <const>140</const>;</li>
+      <li>each arm: NECK&ndash;SHOULDER <const>130</const>, SHOULDER&ndash;ELBOW <const>300</const>, ELBOW&ndash;HAND <const>280</const>;</li>
+      <li>each leg: PELVIS&ndash;KNEE <const>450</const>, KNEE&ndash;ANKLE <const>450</const>;</li>
+      <li>each foot, a rigid triangle of 3 bones (ANKLE&ndash;HEEL, ANKLE&ndash;TOES, HEEL&ndash;TOES): the heel is <const>50</const> behind and <const>60</const> below the ankle, the toes are <const>170</const> in front of and <const>60</const> below the ankle.</li>
+    </ul>
+  </li>
+  <li>A point is considered to touch the floor when the distance between its centre and the floor is less than its radius. Standing flat, the centres of the heels and toes are <const>30</const> mm above the floor (<var>y</var> = <const>2970</const>).</li>
+  <li>Against the other fighter, a body is made of round shapes (radius in mm):
+    <ul>
+      <li>the head: a circle of radius <const>110</const> around HEAD;</li>
+      <li>the torso: three capsules NECK&ndash;CHEST, CHEST&ndash;WAIST and WAIST&ndash;PELVIS, of radius <const>130</const>, <const>120</const> and <const>130</const>;</li>
+      <li>the upper arms: capsules SHOULDER&ndash;ELBOW of radius <const>50</const>; the forearms: capsules ELBOW&ndash;HAND of radius <const>45</const>;</li>
+      <li>the gloves: circles of radius <const>65</const> around the hands;</li>
+      <li>the thighs: capsules PELVIS&ndash;KNEE of radius <const>80</const>; the shins: capsules KNEE&ndash;ANKLE of radius <const>50</const>;</li>
+      <li>the feet: capsules HEEL&ndash;TOES of radius <const>30</const>;</li>
+      <li>the knees: circles of radius <const>75</const> around the knees, which only strike.</li>
+    </ul>
+  </li>
+  <li>A fighter never collides with itself.</li>
 </ul>
 
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">Joints and motors</h3>
 <p>15 joints, each driven by a motor, in this order:</p>
 <div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794655631881/0745a659ab3c2e60401cfd91a2878d5286351d4d784803cd0230481ed724712c.png" alt="Where 0 degrees is and which way is positive for each joint" style="max-width: 100%; border-radius: 8px" /></div>
 <table style="border-collapse: collapse; margin: 8px 0">
-  <tr><th style="padding: 2px 6px">#</th><th style="padding: 2px 6px">Joint</th><th style="padding: 2px 6px">0&deg;</th><th style="padding: 2px 6px">Positive angles</th><th style="padding: 2px 6px">Range (&deg;)</th><th style="padding: 2px 6px">Max torque (N&middot;m)</th><th style="padding: 2px 6px">Max speed (rad/s)</th></tr>
+  <tr><th style="padding: 2px 6px">#</th><th style="padding: 2px 6px">Joint</th><th style="padding: 2px 6px">0&deg;</th><th style="padding: 2px 6px">Positive angles</th><th style="padding: 2px 6px">Range of rotation (&deg;)</th><th style="padding: 2px 6px">Max torque (N&middot;m)</th><th style="padding: 2px 6px">Max speed (rad/s)</th></tr>
   <tr><td style="padding: 2px 6px">0</td><td style="padding: 2px 6px">NECK</td><td style="padding: 2px 6px">head in line with the upper back</td><td style="padding: 2px 6px">head forward, chin tucked</td><td style="padding: 2px 6px">-30 to 45</td><td style="padding: 2px 6px">40</td><td style="padding: 2px 6px">10</td></tr>
   <tr><td style="padding: 2px 6px">1</td><td style="padding: 2px 6px">UPPER_BACK</td><td style="padding: 2px 6px">straight</td><td style="padding: 2px 6px">bent forward</td><td style="padding: 2px 6px">-20 to 35</td><td style="padding: 2px 6px">120</td><td style="padding: 2px 6px">10</td></tr>
   <tr><td style="padding: 2px 6px">2</td><td style="padding: 2px 6px">LOWER_BACK</td><td style="padding: 2px 6px">straight</td><td style="padding: 2px 6px">bent forward</td><td style="padding: 2px 6px">-25 to 40</td><td style="padding: 2px 6px">150</td><td style="padding: 2px 6px">10</td></tr>
@@ -75,6 +101,7 @@
   <tr><td style="padding: 2px 6px">11, 14</td><td style="padding: 2px 6px">LEAD_ANKLE, REAR_ANKLE</td><td style="padding: 2px 6px">sole at a right angle to the shin</td><td style="padding: 2px 6px">toes pointed down</td><td style="padding: 2px 6px">-40 to 50</td><td style="padding: 2px 6px">150</td><td style="padding: 2px 6px">20</td></tr>
 </table>
 <ul>
+  <li>A row with two joints gives the values of each of the two. Max speeds are in rad/s, the unit used by the physics engine: <const>1</const> rad/s is about 57.3&deg;/s, so <const>10</const> rad/s is about 573&deg;/s.</li>
   <li>Girdles, shoulders and hips are measured from the torso line (neck to pelvis), every other joint from the bone before it, in each fighter's own frame: the same command makes the same move on both sides.</li>
   <li>Each motor pulls its joint toward its <var>target</var> angle with a torque capped at <var>strength</var> (<const>0</const> to <const>100</const> %) &times; max torque, the full cap 10&deg; away from the target (5&deg; for the ankles). Like a muscle, it gets weaker as it moves faster, down to 0 at the max speed. Strength 0 leaves a joint limp; a range is a hard stop; targets and strengths stay until they are changed.</li>
 </ul>
@@ -82,7 +109,7 @@
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">A turn</h3>
 <ol>
   <li>Both bots send a command at the same time.</li>
-  <li>The game plays 0.1 s of physics in 40 steps of 2.5 ms. At every step the bodies move and push each other, and the strikes that land are found.</li>
+  <li>Each turn represents <const>0.1</const> seconds of fighting, simulated in <const>40</const> steps of <const>2.5</const> milliseconds. At every step the bodies move and push against each other, and the strikes that land are detected.</li>
   <li>At the end of the turn, everything is settled: the HP taken by the strikes, the stamina, the falls and ring-outs, and the end of the match.</li>
 </ol>
 <p>A match lasts at most <const>250</const> turns: 25 seconds of fighting.</p>
@@ -90,7 +117,7 @@
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">Commands</h3>
 <p>Each turn, a bot writes one line with one of these commands:</p>
 <ul>
-  <li><strong>A move</strong> from the table below, one frame per turn. A held pose (STANCE, GUARD, RELAX, DUCK) lasts as long as it is sent. A timed move lasts the number of turns given: sending its name again, or <action>WAIT</action>, lets it go on; any other command interrupts it at once. At its end, the fighter is back in STANCE, and sending its name again starts it over.</li>
+  <li><strong>A move</strong> from the table below, one frame per turn. A held pose (<action>STANCE</action>, <action>GUARD</action>, <action>RELAX</action>, <action>DUCK</action>) lasts as long as it is sent. A timed move lasts the number of turns given: sending the name of the move again, or <action>WAIT</action>, lets it go on; any other command interrupts it at once. At its end, the fighter is back in <action>STANCE</action>, and sending the name of the move again starts it over.</li>
   <li><action>WAIT</action>: a running move goes on and a held pose is held.
   After <action>JOINTS</action>, the motors keep their targets and strengths.
   </li>
@@ -100,7 +127,7 @@
   <li><action>JOINTS t1 s1 t2 s2 ... t15 s15</action> sets the 15 motors directly, in the joint order: a target in degrees and a strength in % for each joint.
     <ul>
       <li>Each value is a number (an optional minus sign, up to 6 digits, optionally a point and up to 6 decimals), or <action>*</action> to keep the current value. A target is rounded to 0.01&deg;, a strength to a whole number.</li>
-      <li><action>ROUND</action> (in capitals) after the 30 values swings the lead leg around the opponent's body for this turn, as HIGH_KICK does (see Strikes).</li>
+      <li><action>ROUND</action> (in capitals) after the 30 values swings the lead leg around the opponent's body for this turn, as <action>HIGH_KICK</action> does (see Strikes).</li>
       <li><action>JOINTS</action> stops the running move. The legs then only follow their targets: the engine no longer places the feet nor keeps the balance.</li>
       <li>Example: <action>JOINTS</action>, 14 <action>*</action>, <action>10 100</action>, 14 <action>*</action> drops the rear arm (joint 7 to 10&deg; at 100 %) and keeps every other motor as it is.</li>
     </ul>
@@ -110,41 +137,47 @@
 <p>Any text after the command is a message, shown above the fighter (40 characters at most).
 After <action>JOINTS</action>, the message must not start with a number or <action>*</action>.
 </p>
-<p>The line may start with <action>LOOK skin hair</action> to choose the fighter's look on the first turn (example: <action>LOOK 3 5 STEP_FORWARD</action>; alone, it is a <action>WAIT</action>). <var>skin</var>: <const>0</const> (very light) to <const>7</const> (very dark). <var>hair</var>: <const>0</const> black, <const>1</const> dark brown, <const>2</const> brown, <const>3</const> light brown, <const>4</const> dark blond, <const>5</const> blond, <const>6</const> auburn, <const>7</const> ginger, <const>8</const> grey, <const>9</const> bald. Shorts and gloves wear the player's colour.</p>
-<p><strong>Wrong lines.</strong> A line that is not a command (empty, or an unknown name: names are in capitals) loses the match. A command that is recognized but cannot be played as written is not played: the console says why, and WAIT is played instead
-(for example <action>JOINTS</action> with a value missing, one too many, or a value that is not a number). A value out of its range is played as the closest valid value, and the console says so.
-A <action>LOOK</action> that cannot be used (a later turn, other values) is ignored, with a message, and the rest of the line is played.</p>
+<p>The line may start with <action>LOOK skin hair</action> to choose the fighter's look on the first turn (example: <action>LOOK 3 5 STEP_FORWARD</action>; alone, it is a <action>WAIT</action>).</p>
+<ul>
+  <li><var>skin</var>: <const>0</const> (very light) to <const>7</const> (very dark).</li>
+  <li><var>hair</var>: <const>0</const> black, <const>1</const> dark brown, <const>2</const> brown, <const>3</const> light brown, <const>4</const> dark blond, <const>5</const> blond, <const>6</const> auburn, <const>7</const> ginger, <const>8</const> grey, <const>9</const> bald.</li>
+</ul>
+<p>Shorts and gloves are in the player's colour.</p>
 
 <table style="border-collapse: collapse; margin: 8px 0">
   <tr><th style="padding: 2px 6px">Move</th><th style="padding: 2px 6px">Turns</th><th style="padding: 2px 6px">What it does</th></tr>
-  <tr><td style="padding: 2px 6px">STANCE</td><td style="padding: 2px 6px">held</td><td style="padding: 2px 6px">boxing stance: lead foot forward, rear foot 42 cm behind it, knees slightly bent, lead glove at eye level, rear glove at the chin</td></tr>
-  <tr><td style="padding: 2px 6px">GUARD</td><td style="padding: 2px 6px">held</td><td style="padding: 2px 6px">high guard: both gloves in front of the face, arms held firmer, chin tucked</td></tr>
-  <tr><td style="padding: 2px 6px">RELAX</td><td style="padding: 2px 6px">held</td><td style="padding: 2px 6px">arms hanging at 10 % strength: cheaper in stamina, but the head is open</td></tr>
-  <tr><td style="padding: 2px 6px">DUCK</td><td style="padding: 2px 6px">held</td><td style="padding: 2px 6px">back bent forward, chin down, gloves up, a quarter of the way down per turn: fully ducked after 4 turns, the head about 35 cm lower</td></tr>
-  <tr><td style="padding: 2px 6px">JAB</td><td style="padding: 2px 6px">3</td><td style="padding: 2px 6px">lead straight in 1 turn, the pelvis 11 cm forward over the feet; then 2 turns back to the stance</td></tr>
-  <tr><td style="padding: 2px 6px">CROSS</td><td style="padding: 2px 6px">3</td><td style="padding: 2px 6px">rear straight in 2 turns, the pelvis 9 cm forward; then 1 turn back</td></tr>
-  <tr><td style="padding: 2px 6px">OVERHAND</td><td style="padding: 2px 6px">3</td><td style="padding: 2px 6px">the rear arm loads high (1 turn), then comes down over the opponent's gloves (1 turn); then 1 turn back</td></tr>
-  <tr><td style="padding: 2px 6px">KICK</td><td style="padding: 2px 6px">6</td><td style="padding: 2px 6px">lead-leg kick: weight onto the rear foot, knee up, kick, knee back, foot down, on one leg meanwhile</td></tr>
-  <tr><td style="padding: 2px 6px">HIGH_KICK</td><td style="padding: 2px 6px">12</td><td style="padding: 2px 6px">lead-leg round kick to the head: the leg swings up and around the opponent's body, then comes back down</td></tr>
-  <tr><td style="padding: 2px 6px">STEP_FORWARD</td><td style="padding: 2px 6px">7</td><td style="padding: 2px 6px">the lead foot goes about 25 cm forward, then the rear foot follows it</td></tr>
-  <tr><td style="padding: 2px 6px">STEP_BACK</td><td style="padding: 2px 6px">7</td><td style="padding: 2px 6px">the rear foot goes first, then the lead foot follows it</td></tr>
-  <tr><td style="padding: 2px 6px">JUMP</td><td style="padding: 2px 6px">7</td><td style="padding: 2px 6px">crouch, push off with both legs, knees tucked in the air, landing: the feet leave the floor by about 30 cm</td></tr>
+  <tr><td style="padding: 2px 6px"><action>STANCE</action></td><td style="padding: 2px 6px">held</td><td style="padding: 2px 6px">boxing stance: lead foot forward, rear foot 42 cm behind it, knees slightly bent, lead glove at eye level, rear glove at the chin</td></tr>
+  <tr><td style="padding: 2px 6px"><action>GUARD</action></td><td style="padding: 2px 6px">held</td><td style="padding: 2px 6px">high guard: both gloves in front of the face, arms held firmer, chin tucked</td></tr>
+  <tr><td style="padding: 2px 6px"><action>RELAX</action></td><td style="padding: 2px 6px">held</td><td style="padding: 2px 6px">arms hanging at 10 % strength: cheaper in stamina, but the head is open</td></tr>
+  <tr><td style="padding: 2px 6px"><action>DUCK</action></td><td style="padding: 2px 6px">held</td><td style="padding: 2px 6px">back bent forward, chin down, gloves up, a quarter of the way down per turn: fully ducked after 4 turns, the head about 35 cm lower</td></tr>
+  <tr><td style="padding: 2px 6px"><action>JAB</action></td><td style="padding: 2px 6px">3</td><td style="padding: 2px 6px">lead straight in 1 turn, the pelvis 11 cm forward over the feet; then 2 turns back to the stance</td></tr>
+  <tr><td style="padding: 2px 6px"><action>CROSS</action></td><td style="padding: 2px 6px">3</td><td style="padding: 2px 6px">rear straight in 2 turns, the pelvis 9 cm forward; then 1 turn back</td></tr>
+  <tr><td style="padding: 2px 6px"><action>OVERHAND</action></td><td style="padding: 2px 6px">4</td><td style="padding: 2px 6px">the rear arm loads high (2 turns), then comes down over the opponent's gloves (1 turn); then 1 turn back</td></tr>
+  <tr><td style="padding: 2px 6px"><action>KICK</action></td><td style="padding: 2px 6px">6</td><td style="padding: 2px 6px">lead-leg kick: weight onto the rear foot, knee up, kick, knee back, foot down, on one leg meanwhile</td></tr>
+  <tr><td style="padding: 2px 6px"><action>HIGH_KICK</action></td><td style="padding: 2px 6px">12</td><td style="padding: 2px 6px">lead-leg round kick to the head: the leg swings up and around the opponent's body, then comes back down</td></tr>
+  <tr><td style="padding: 2px 6px"><action>STEP_FORWARD</action></td><td style="padding: 2px 6px">7</td><td style="padding: 2px 6px">the lead foot goes about 25 cm forward, then the rear foot follows it</td></tr>
+  <tr><td style="padding: 2px 6px"><action>STEP_BACK</action></td><td style="padding: 2px 6px">7</td><td style="padding: 2px 6px">the rear foot goes first, then the lead foot follows it</td></tr>
+  <tr><td style="padding: 2px 6px"><action>JUMP</action></td><td style="padding: 2px 6px">7</td><td style="padding: 2px 6px">crouch, push off with both legs, knees tucked in the air, landing: the feet leave the floor by about 30 cm</td></tr>
 </table>
+<p><strong>Wrong lines.</strong> A line that is not a command (empty, or an unknown name: names are in capitals) loses the match. A command that is recognized but cannot be played as written is not played: the console says why, and <action>WAIT</action> is played instead
+(for example <action>JOINTS</action> with a value missing, one too many, or a value that is not a number). A value out of its range is played as the closest valid value, and the console says so.
+A <action>LOOK</action> that cannot be used (a later turn, other values) is ignored, with a message, and the rest of the line is played.</p>
 
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">Legs and balance</h3>
 <p>A fighter keeps its balance while its <strong>weight point</strong> stays over its feet: the <var>x</var> of its centre of mass plus the horizontal speed of the centre of mass &times; &radic;(height of the centre of mass above the floor &divide; 9.81), in m and m/s.</p>
 <div style="text-align: center; margin: 12px 0"><img src="https://cdn-games.codingame.com/community/7212247-1794655631881/23dc2f098bba196443e0fb3b604aa0c36546e859661c21dc8920db0e5d549d55.png" alt="Strike zones, and the weight point against the feet" style="max-width: 100%; border-radius: 8px" /></div>
 <ul>
-  <li>For the held poses, the punches and the steps, <strong>the engine runs the legs</strong> at 100 % strength: it places the pelvis above the feet, the ankles lean against where the weight goes, and the feet are put back 42 cm apart when they drift.</li>
-  <li><strong>Balance step</strong>: when the weight point goes more than 2 cm past the front toes or behind the rear heel, the foot on that side steps under it. The game summary reports these steps. During STEP_FORWARD and STEP_BACK the feet only go the way of the step: a step back while the weight goes forward (or the reverse) can make the fighter fall.</li>
-  <li>KICK, HIGH_KICK and JUMP leave the legs to their own targets: no help with the balance.
+  <li>For the held poses, the punches and the steps, <strong>the engine runs the legs</strong> at 100 % strength: it places the pelvis above the feet, the ankles lean against where the weight goes, and the feet are put back 42 cm apart when they drift more than 6 cm from that spacing (15 cm while ducked).</li>
+  <li><strong>Balance step</strong>: when the weight point goes more than 2 cm past the feet, a foot steps and lands under the weight point. The game summary reports these steps.</li>
+  <li><strong>Walking</strong> (<action>STEP_FORWARD</action>, <action>STEP_BACK</action>): a fighter whose weight is not placed for the step (after a push, a strike, or at speed) first keeps its balance: its legs hold its place for a turn, as in a held pose, then its step starts again. Otherwise the feet only go the way of the step: a step back while the weight goes forward (or the reverse) can make the fighter fall.</li>
+  <li><action>KICK</action>, <action>HIGH_KICK</action> and <action>JUMP</action> leave the legs to their own targets: no help with the balance.
   So does <action>JOINTS</action>.
   </li>
-  <li><var>rise</var> (<const>0</const> to <const>4</const>) counts how many quarters deep the fighter is ducked: DUCK adds one, the other poses and the punches take one away, and a kick, a step or JUMP
+  <li><var>rise</var> (<const>0</const> to <const>4</const>) counts how many quarters deep the fighter is ducked: <action>DUCK</action> adds one, the other poses and the punches take one away, and a kick, a step or <action>JUMP</action>
   (or <action>JOINTS</action>)
   sets it back to <const>0</const>.</li>
 </ul>
-<p>The exact numbers of the legs are in the source code (<var>Game.java</var>).</p>
+<p>The exact conditions of these steps are in the Expert Rules. The exact numbers of the legs are in the source code (<span style="font-family: monospace">Game.java</span>).</p>
 
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">Strikes</h3>
 <ul>
@@ -152,27 +185,30 @@ A <action>LOOK</action> that cannot be used (a later turn, other values) is igno
   <li>A strike scores when the striking part touches the opponent while the two close in at <const>2</const> m/s or more, and the striking part itself moves toward the target at <const>1</const> m/s or more. <strong>Damage = zone &times; (closing speed &minus; 2)</strong>, with the closing speed in m/s capped at <const>12</const>, rounded to the nearest whole number (halves up). Example: a glove landing on the head at 7 m/s takes 10 HP.</li>
   <li>A strike on an upper arm or a forearm is blocked: no damage. Touching a glove deals nothing either.</li>
   <li>One hit per contact: a striking part scores again only after it has been away from the opponent for 10 physics steps (25 ms). A foot scores only where it touches at least 30 cm above the floor. Nothing scores once a fighter is down.</li>
-  <li><strong>Depth</strong>: each fighter's lead side faces the other's rear side. A lead limb passes beside the opponent's lead limbs and meets its rear limbs, head and torso; a rear limb meets the opponent's lead limbs, head and torso. So a JAB can only be blocked by the rear arm, a CROSS by the lead arm. The legs pass beside each other, except that a lead foot meets the rear thigh.</li>
-  <li><strong>Round kick</strong>: during HIGH_KICK
+  <li><strong>Depth</strong>: each fighter's lead side faces the other's rear side. A lead limb passes beside the opponent's lead limbs and meets its rear limbs, head and torso; a rear limb meets the opponent's lead limbs, head and torso. So a <action>JAB</action> can only be blocked by the rear arm, a <action>CROSS</action> by the lead arm. The legs pass beside each other, except that a lead foot meets the rear thigh.</li>
+  <li><strong>Round kick</strong>: during <action>HIGH_KICK</action>
   (or a turn of <action>JOINTS ... ROUND</action>)
   the lead leg goes around the opponent's body: it meets only the head, and the rear forearm and glove while that glove is held high.</li>
   <li>Every contact also pushes: the two bodies never overlap, and a blocked strike can still knock a fighter off balance.</li>
 </ul>
-<p>The strikes against a fighter holding a pose, 0.8 to 0.9 m away (pelvis to pelvis), measured with the referee:</p>
+<p>The strikes against a fighter holding a pose, 0.8 to 0.9 m away (distance between the two PELVIS points), measured with the referee:</p>
 <table style="border-collapse: collapse; margin: 8px 0">
-  <tr><th style="padding: 2px 6px">Strike</th><th style="padding: 2px 6px">on STANCE</th><th style="padding: 2px 6px">on GUARD</th><th style="padding: 2px 6px">on DUCK</th></tr>
-  <tr><td style="padding: 2px 6px">JAB</td><td style="padding: 2px 6px">2 to 3 HP (head)</td><td style="padding: 2px 6px">0</td><td style="padding: 2px 6px">0</td></tr>
-  <tr><td style="padding: 2px 6px">CROSS</td><td style="padding: 2px 6px">4 to 7 HP (head)</td><td style="padding: 2px 6px">1 to 2 HP</td><td style="padding: 2px 6px">0</td></tr>
-  <tr><td style="padding: 2px 6px">OVERHAND</td><td style="padding: 2px 6px">8 to 10 HP (head)</td><td style="padding: 2px 6px">6 to 7 HP</td><td style="padding: 2px 6px">0</td></tr>
-  <tr><td style="padding: 2px 6px">KICK</td><td style="padding: 2px 6px">5 to 6 HP (thigh, two hits)</td><td style="padding: 2px 6px">4 to 6 HP</td><td style="padding: 2px 6px">4 to 5 HP</td></tr>
-  <tr><td style="padding: 2px 6px">HIGH_KICK</td><td style="padding: 2px 6px">5 to 7 HP (head) from 0.85 m; less closer</td><td style="padding: 2px 6px">11 to 12 HP (head): it goes around the guard</td><td style="padding: 2px 6px">0</td></tr>
+  <tr><th style="padding: 2px 6px">Strike</th><th style="padding: 2px 6px">on <action>STANCE</action></th><th style="padding: 2px 6px">on <action>GUARD</action></th><th style="padding: 2px 6px">on <action>DUCK</action></th></tr>
+  <tr><td style="padding: 2px 6px"><action>JAB</action></td><td style="padding: 2px 6px">3 HP (head)</td><td style="padding: 2px 6px">0</td><td style="padding: 2px 6px">0</td></tr>
+  <tr><td style="padding: 2px 6px"><action>CROSS</action></td><td style="padding: 2px 6px">4 to 7 HP (head)</td><td style="padding: 2px 6px">1 to 2 HP</td><td style="padding: 2px 6px">0</td></tr>
+  <tr><td style="padding: 2px 6px"><action>OVERHAND</action></td><td style="padding: 2px 6px">7 HP (head)</td><td style="padding: 2px 6px">3 to 4 HP</td><td style="padding: 2px 6px">0</td></tr>
+  <tr><td style="padding: 2px 6px"><action>KICK</action></td><td style="padding: 2px 6px">3 to 4 HP (thigh)</td><td style="padding: 2px 6px">3 to 4 HP</td><td style="padding: 2px 6px">3 HP</td></tr>
+  <tr><td style="padding: 2px 6px"><action>HIGH_KICK</action></td><td style="padding: 2px 6px">5 to 6 HP (head) from 0.85 m; less closer</td><td style="padding: 2px 6px">7 to 12 HP (head): it goes around the guard</td><td style="padding: 2px 6px">0</td></tr>
 </table>
+<p>These values are those of the ready-made strikes. A strike built with <action>JOINTS</action> can land faster, up to the cap of the formula (<const>20</const> HP on the head), and no held pose stops every strike.</p>
+<p>A ducked head is lower and ahead of its feet: the punches go over it from 0.8 to 0.9 m, and reach it from farther away. <action>JAB</action>: 4 to 8 HP from 1.10 to 1.24 m. <action>CROSS</action>: 4 to 7 HP from 1.06 to 1.24 m. <action>OVERHAND</action>: 4 to 9 HP from 1.20 to 1.36 m.</p>
 
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">Falls and ring-outs</h3>
 <ul>
   <li>Only the feet (ankles, heels and toes) may touch the floor. When any other point touches it, the fighter is <strong>down</strong>. When any point touches the floor outside the ring (<var>x</var> below <const>2000</const> or above <const>8000</const>), the fighter is <strong>out</strong>.</li>
-  <li>A down or an out costs <const>20</const> HP, except after a push: when the fighters touched during that turn or the 20 turns before, and no strike took HP in that time, the fall is free.</li>
-  <li>After a turn with a down or an out, both fighters go back to their starting places, in STANCE and at rest. HP and stamina stay as they are.</li>
+  <li>A split too deep is a fall too: at the end of a turn, a fighter whose ankles are more than <const>800</const> apart in <var>x</var> while its pelvis is less than 45 cm above the floor (<var>y</var> above <const>2550</const>) is <strong>down</strong>.</li>
+  <li>A down or an out costs <const>20</const> HP. After a push, it costs <const>10</const> HP: a push is when the fighters touched during that turn or the 20 turns before, and no strike took HP in that time.</li>
+  <li>After a turn with a down or an out, both fighters go back to their starting places, in <action>STANCE</action> and at rest. HP and stamina stay as they are.</li>
 </ul>
 
 <h3 style="font-size: 16px; font-weight: 700; padding-top: 20px; color: #838891; padding-bottom: 15px">Stamina</h3>
@@ -216,11 +252,32 @@ A <action>LOOK</action> that cannot be used (a later turn, other values) is igno
   <h1><span class="icon icon-expertrules">&nbsp;</span><span>Expert Rules</span></h1>
   <div class="statement-expert-rules-content">
     <ul>
-      <li><strong>The input is the whole state of the match.</strong> The engine is on <a href="https://github.com/mehdiAyari/byte-club" target="_blank">GitHub</a> (classes <var>Game</var>, <var>Physics</var>, <var>Moves</var> and <var>Command</var>). A copy rebuilt with <var>Game.fromInput</var> holds the player's fighter as fighter 0, on the left, as the input shows it: given both commands (<var>apply(0, ...)</var> for the player, <var>apply(1, ...)</var> for the opponent), it computes exactly the next input, <var>inputLines(0)</var>. Only the opponent's command is unknown.</li>
+      <li><strong>The input is the whole state of the match.</strong> The engine is on <a href="https://github.com/mehdiAyari/byte-club" target="_blank">GitHub</a> (classes <span style="font-family: monospace">Game</span>, <span style="font-family: monospace">Physics</span>, <span style="font-family: monospace">Moves</span> and <span style="font-family: monospace">Command</span>). A copy rebuilt with <span style="font-family: monospace">Game.fromInput</span> holds the player's fighter as fighter 0, on the left, as the input shows it: given both commands (<span style="font-family: monospace">apply(0, ...)</span> for the player, <span style="font-family: monospace">apply(1, ...)</span> for the opponent), it computes exactly the next input, <span style="font-family: monospace">inputLines(0)</span>. Only the opponent's command is unknown.</li>
       <li>Nothing is random during a match. Only the starting distance is drawn; in the IDE, the game parameter <var>distance</var> sets it.</li>
       <li>A physics step only uses additions, subtractions, multiplications, divisions and square roots on 64-bit floating-point numbers: it gives the same numbers in every language.</li>
-      <li>A step of 2.5 ms: gravity and the motors change the speeds, the points move, the strikes are found (their HP are taken at the end of the turn), then the bones, the joint ranges, the contacts and the floor are enforced. The contacts between the fighters are solved in both orders and averaged: a match and its mirror image play the same. The exact order and the motor law are in <var>Physics.java</var>.</li>
-      <li>At the end of a turn, positions are rounded to the millimetre and speeds to the millimetre per second (halves to the even number): the next turn starts from exactly what the input says. The angles of the input are worked out from the points and rounded, the targets are exact; a joint's speed can be worked out from the speeds of the points (<var>Physics.angSpeed</var>).</li>
+      <li>A step of 2.5 ms: gravity and the motors change the speeds, the points move, the strikes are detected (their HP are taken at the end of the turn), then the bones, the joint ranges, the contacts and the floor are enforced. The contacts between the fighters are solved in both orders and averaged: a match and its mirror image play the same. The exact order and the motor law are in <span style="font-family: monospace">Physics.java</span>.</li>
+      <li>At the end of a turn, positions are rounded to the millimetre and speeds to the millimetre per second (halves to the even number): the next turn starts from exactly what the input says. The angles of the input are worked out from the points and rounded, the targets are exact; a joint's speed can be worked out from the speeds of the points (<span style="font-family: monospace">Physics.angSpeed</span>).</li>
+      <li><strong>Legs and balance, the exact conditions of the steps.</strong>
+        <ul>
+          <li>Both feet on the floor: when the weight point goes more than 2 cm past the feet (ahead of the front toes or behind the rear heel) while both feet are on the floor, the foot the weight is leaving steps past the other foot and lands under the weight point.</li>
+          <li>With one foot in the air, as soon as the weight point goes more than 2 cm past the foot on the floor, the foot in the air comes down under it (or at its place of the stance when that is farther); a foot already more than 6 cm past the weight point goes no farther (it comes down where it is, or, with the feet more than 70 cm apart, closer to the body when it has gone past its landing place), and a foot that is lifting off does not count as the foot on the floor.</li>
+          <li>With the feet more than 80 cm apart, the pelvis no longer sinks to reach both feet: it stays above the foot it goes to, and the other foot follows sooner.</li>
+          <li>From 70 cm apart, during a step, the other foot already follows as soon as the weight point is past the middle of the feet and the pelvis goes toward the first foot slower than 0.15 m/s.</li>
+          <li>A foot that hangs in the air while the pelvis and that foot both move slower than 0.05 m/s is put down where it is.</li>
+            <li>A fighter that walks (<action>STEP_FORWARD</action>, <action>STEP_BACK</action>) first keeps its balance: at the start of a turn, its legs hold its place for that turn as they do in a held pose, balance steps included, and its step starts again from its first turn after, in each of these cases:
+            <ul>
+                <li>its centre of mass goes the way of the step faster than 1.3 m/s (0.7 m/s in <action>STEP_BACK</action>);</li>
+                <li>its centre of mass goes the other way faster than 0.3 m/s while its weight point is past the foot that the step leaves on the floor (behind the heel of the rear leg's foot in <action>STEP_FORWARD</action>, ahead of the toes of the lead leg's foot in <action>STEP_BACK</action>);</li>
+                <li>on the first turn of a step, its weight point is less than 13 cm in front of the rear heel (or behind it), or, in <action>STEP_BACK</action>, less than 13 cm behind the front toes (or ahead of them);</li>
+                <li>on a later turn of a step, its weight point is more than 10 cm past the feet on the side opposite to the step (behind the rear heel in <action>STEP_FORWARD</action>, ahead of the front toes in <action>STEP_BACK</action>);</li>
+                <li>the step follows <action>GUARD</action>, <action>RELAX</action>, <action>DUCK</action>, a punch or a step that held its place, and either the legs of a held pose take a balance step on this turn, or a foot is in the air (its heel and its toes both higher than 45 mm; they are at 30 mm on the floor), or, in <action>STEP_FORWARD</action>, the torso line (from the pelvis to the neck) leans more than 30&deg; forward.</li>
+            </ul>
+          </li>
+          <li>Feet that are only out of place do not hold a walker: its step puts them back.</li>
+          <li>When the weight point goes more than 2 cm past the foot that steps first (ahead of its toes in <action>STEP_FORWARD</action>, behind its heel in <action>STEP_BACK</action>), that foot steps again at once, without waiting for the next move.</li>
+          <li>In the first 3.5 turns of a step, while both feet are on the floor and the foot that steps first is behind the other foot the way the step goes (crossed feet: the lead leg's foot behind the rear leg's foot in <action>STEP_FORWARD</action>, the rear leg's foot ahead of the lead leg's foot in <action>STEP_BACK</action>), that foot stays on the floor until the weight point is on the other foot, at least 2 cm ahead of its heel in <action>STEP_FORWARD</action> or 2 cm behind its toes in <action>STEP_BACK</action>; until then both legs push the weight point there.</li>
+        </ul>
+      </li>
     </ul>
   </div>
 </div>
@@ -231,7 +288,7 @@ A <action>LOOK</action> that cannot be used (a later turn, other values) is igno
   <div class="blk">
     <div class="title">Initialization input</div>
     <div class="text">
-      <span class="statement-lineno">First line:</span> one integer <var>startDistance</var>: the distance between the two pelvises at the start, in mm.
+      <span class="statement-lineno">First line:</span> one integer <var>startDistance</var>: the horizontal distance between the PELVIS points of the two fighters at the start, in mm.
     </div>
   </div>
   <div class="blk">

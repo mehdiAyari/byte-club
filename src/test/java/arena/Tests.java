@@ -135,7 +135,7 @@ public final class Tests {
                 if (EV) System.out.println("        " + cut(r.evlog.toString(), 2500));
             }
         }
-        System.out.printf(Locale.ROOT, "== %s vs %s: %d wins, %d draws, %d losses of %d | per match: %s loses %.1f HP to hits + %.1f to falls (%.1f falls, %.1f free); %s loses %.1f + %.1f (%.1f falls, %.1f free) | %.0f turns, %.1f resets | ms per turn %.1f vs %.1f%s%n",
+        System.out.printf(Locale.ROOT, "== %s vs %s: %d wins, %d draws, %d losses of %d | per match: %s loses %.1f HP to hits + %.1f to falls (%.1f falls, %.1f pushed); %s loses %.1f + %.1f (%.1f falls, %.1f pushed) | %.0f turns, %.1f resets | ms per turn %.1f vs %.1f%s%n",
             a, b, tot[0], tot[1], tot[2], n, a, (double) agg[0] / n, (double) agg[1] / n, (double) agg[4] / n, (double) agg[6] / n, b, (double) agg[2] / n, (double) agg[3] / n, (double) agg[5] / n, (double) agg[7] / n,
             (double) agg[10] / n, (double) agg[11] / n, agg[8] / 1e6 / n, agg[9] / 1e6 / n, o.checkSim ? " | checks: copy wrong " + agg[12] + ", mirror wrong " + agg[13] : "");
         return rs;
@@ -226,7 +226,7 @@ public final class Tests {
         Integer[] order = new Integer[B];
         for (int i = 0; i < B; i++) order[i] = i;
         Arrays.sort(order, (x, y) -> (2 * wdl[y][0] + wdl[y][1]) - (2 * wdl[x][0] + wdl[x][1]));
-        System.out.println("  bot              W   D   L | per match: HP lost to hits, to falls | falls, ring-outs, of which free | recovery steps, of which back to back");
+        System.out.println("  bot              W   D   L | per match: HP lost to hits, to falls | falls, ring-outs, of which pushed | recovery steps, of which back to back");
         for (int i : order) {
             long[] q = st[i]; double c = Math.max(1, q[7]);
             System.out.printf(Locale.ROOT, "  %-14s %3d %3d %3d | %5.1f %5.1f | %4.1f %4.1f %4.1f | %5.1f %5.1f%n", bots.get(i), wdl[i][0], wdl[i][1], wdl[i][2], q[0] / c, q[1] / c, q[2] / c, q[3] / c, q[4] / c, q[5] / c, q[6] / c);
@@ -249,7 +249,7 @@ public final class Tests {
         for (String b : Bots.NAMED) if (!ex.contains(b)) bots.add(b);
         if (!extra.isEmpty()) bots.addAll(Arrays.asList(extra.split(",")));
         String far = "paid: no contact for more than " + Game.WINDOW + " turns";
-        String[] kind = {"free: pushed, nobody hit in the " + Game.WINDOW + " turns before", "paid: it was hit in the " + Game.WINDOW + " turns before", "paid: it landed a hit in the " + Game.WINDOW + " turns before, took none",
+        String[] kind = {"pushed (-" + Game.PUSH_FALL + " HP): nobody hit in the " + Game.WINDOW + " turns before", "paid: it was hit in the " + Game.WINDOW + " turns before", "paid: it landed a hit in the " + Game.WINDOW + " turns before, took none",
             far + ", a recovery step in the 25 turns before", far + ", no recovery step",
             "(of the paid ones) it was hit 11 to " + Game.WINDOW + " turns before and nobody was hit after that, contact in the window", "(of the paid ones) it landed a hit 11 to " + Game.WINDOW + " turns before, took none, nobody was hit after that, contact in the window"};
         int[] count = new int[kind.length], outs = new int[kind.length]; List<List<String>> examples = new ArrayList<List<String>>();
@@ -327,6 +327,10 @@ public final class Tests {
         else if (mode.equals("mirror")) mirror(Integer.parseInt(a[1]));
         else if (mode.equals("strike")) Scenes.strike(a.length > 1 ? range(a[1]) : new int[]{780, 820, 860, 900});
         else if (mode.equals("push")) Scenes.push();
+        else if (mode.equals("fallcost")) Scenes.fallCost();
+        else if (mode.equals("legs")) Scenes.legs(a.length > 1 ? a[1] : "");
+        else if (mode.equals("pushwalk")) Scenes.pushWalk();
+        else if (mode.equals("split")) Scenes.split();
         else if (mode.equals("chain")) Scenes.chain();
         else if (mode.equals("launch")) Scenes.launch();
         else if (mode.equals("tire")) Scenes.tire();

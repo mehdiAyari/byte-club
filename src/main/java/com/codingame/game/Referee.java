@@ -150,12 +150,10 @@ public class Referee extends AbstractReferee {
         for (int f = 0; f < 2; f++) if (game.w.blockedBy[f] > 0) say(name[1 - f] + " stops a strike of " + name[f] + " with its arms.");
         for (int f = 0; f < 2; f++) {
             if (!game.down[f] && !game.out[f]) continue;
-            String what = game.down[f] ? name[f] + " falls (" + Physics.PNAME[game.w.downPt[f]] + " on the floor)" : name[f] + " steps out of the ring";
-            if (game.freeFall[f]) say(what + ": no HP lost, the fighters were pushing each other and no strike had scored for " + Game.WINDOW + " turns.");
-            else {
-                say(what + ": -" + Game.FALL + " HP.");
-                gameManager.addTooltip(gameManager.getPlayer(f), what + ": -" + Game.FALL + " HP");
-            }
+            String what = game.split[f] ? name[f] + " falls (split too deep)" : game.down[f] ? name[f] + " falls (" + Physics.PNAME[game.w.downPt[f]] + " on the floor)" : name[f] + " steps out of the ring";
+            int cost = game.pushFall[f] ? Game.PUSH_FALL : Game.FALL;
+            say(what + ": -" + cost + " HP" + (game.pushFall[f] ? " (after a push: the fighters touched and no strike had scored for " + Game.WINDOW + " turns)." : "."));
+            gameManager.addTooltip(gameManager.getPlayer(f), what + ": -" + cost + " HP");
         }
         if (game.stoodUp && !game.over()) say("Both fighters go back to their starting places.");
     }

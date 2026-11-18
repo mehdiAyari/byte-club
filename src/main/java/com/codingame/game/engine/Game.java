@@ -14,16 +14,28 @@ public final class Game {
     /** The fighters start between 1.6 m and 2.4 m apart, an even number of millimetres: the two sides are exact mirror images. */
     public static final int DISTANCE_MIN = 1600, DISTANCE_MAX = 2400;
     public static final int FALL = 20;                 // HP lost by a fall or a ring-out
-    /** A fall is free when the fighters touched and no strike scored in the last WINDOW turns: a push, not a knockdown. */
+    public static final int PUSH_FALL = 10;            // HP lost by a fall or a ring-out after a push
+    /** A fall costs PUSH_FALL instead of FALL when the fighters touched and no strike scored in the last WINDOW turns: a push, not a knockdown. */
     public static final int WINDOW = 20;
     /** A match where the fighters have not touched for STALE turns stops: the fighter with more HP wins (sinceContact counts these turns). */
     public static final int STALE = 150;
     public static final int FULL = 100000;             // stamina is counted in thousandths of a percent
-    public static final int REGEN = 3500, HIT_DRAIN = 1000;
+    public static final int REGEN = 4840, HIT_DRAIN = 1000;
     /** Stamina spent per turn and per percent of strength, for each joint. */
-    public static final int[] EFFORT = {2, 2, 2, 3, 4, 4, 3, 4, 4, 4, 4, 4, 4, 4, 4};
-    /** Ankle reflex of the held poses: degrees per metre of lean, per metre per second, and the most it adds. */
-    public static final double RKP = 60, RKD = 40, RMAX = 15;
+    public static final int[] EFFORT = {4, 4, 4, 6, 8, 8, 6, 8, 8, 4, 4, 4, 4, 4, 4};
+    /**
+     * Ankle reflex of the held poses: degrees per metre of lean, per metre per second, and the most it adds. The lean is counted from where
+     * the weight of a standing fighter rests, up to RREST in front of the middle of its feet (0 once fully ducked).
+     */
+    public static final double RKP = 60, RKD = 40, RMAX = 15, RREST = 0.035;
+    /** Legs that stand: a catching foot already LAND_PAST past the weight point goes no farther, and comes back in only with the feet more than COME_IN apart; a foot higher than FIRM is leaving the floor and carries nothing. */
+    public static final double LAND_PAST = 0.06, COME_IN = 0.7, SPLIT = 0.8, SPLIT_V = 0.15, FIRM = 0.035;
+    /**
+     * Feet that a step leaves more than SPACING + WIDE apart: the second foot is brought in as soon as the weight is past the middle of the
+     * feet and the pelvis no longer advances, as in a split. A second foot that hangs in the air while neither the pelvis nor that foot
+     * moves faster than REST_V cannot reach its place: it is put down where it is.
+     */
+    public static final double WIDE = 0.28, REST_V = 0.05, ONTO = 0.02;
     static final int NP = Physics.NP, NJ = Physics.NJ, NS = Physics.NS;
 
     // ---------- the frame of the input
@@ -60,8 +72,11 @@ public final class Game {
     public final boolean[] roundAsked = new boolean[2];
 
     // what the last turn did, for the referee and the viewer
-    public final boolean[] down = new boolean[2], out = new boolean[2], freeFall = new boolean[2];
+    public final boolean[] down = new boolean[2], out = new boolean[2], pushFall = new boolean[2];
     public final int[] hitLoss = new int[2], fallStep = {-1, -1};
+    /** The fighter went down this turn because of a split too deep, not because a part of its body touched the floor. */
+    public final boolean[] split = new boolean[2];
+    public static final double SPLIT_LOW = 0.45;                    // m: the height of the pelvis under which a split is a fall
     public boolean stoodUp;
     public final int[][] look = {{2, 1}, {5, 0}};
     public final String[] message = {"", ""};
@@ -110,6 +125,10 @@ public final class Game {
     }
 
     public void command(int f, Command c) {
+        // read before the move changes: a step still at its first turn is a step that held its place
+        int was = move[f];
+        afterHold[f] = was != Moves.NONE && was != Moves.STANCE
+            && (Moves.HELD[was] || Moves.LUNGE[was] != null || (was == Moves.STEP_FORWARD || was == Moves.STEP_BACK) && frame[f] == 0);
         walking[f] = 0;
         if (c.type == Command.JOINTS) {
             for (int j = 0; j < NJ; j++) {
@@ -186,9 +205,9 @@ public final class Game {
     public static final double DUCK_X = -0.08, DUCK_TOL = 0.15;
     // the numbers of a step: its length, how far ahead of itself the pelvis is asked to go at most, how close to the first foot the weight must be going
     // for the second foot to leave, how high a foot is lifted (at most, and per metre left to travel), how hard the body is pushed and brought home,
-    // and how far past the edge of the first foot the push aims
+    // and how far past the edge of the first foot the push aims (a step back aims at the edge itself: aimed short of it, a long walk back runs away)
     static final int D = 0, PUSH = 1, EDGE = 2, LIFT = 3, LIFT_K = 4, G_PUSH = 5, G_HOME = 6, AIM = 7, LAND = 8, REACH_X = 9, SLOW = 10, BRAKE = 11, BOOST = 12, RISE_V = 13, AHEAD = 14;
-    public static final double[] FWD = {0.25, 0.08, 0.06, 0.09, 1.0, 1.5, 1.0, -0.03, 0.01, 0.08, 1.0, 0.04, 3.0, 0.15, 0.07}, BACK = {0.25, 0.08, 0.06, 0.09, 1.0, 1.5, 1.0, -0.03, 0.01, 0.08, 1.0, 0.04, 3.0, 0.15, 0.07}, HOLD = {0, 0.08, 0.06, 0.09, 1.0, 1.5, 1.0, -0.03, 0.01, 0.08, 1.0, 0.04, 3.0, 0.15, 0.07};
+    public static final double[] FWD = {0.25, 0.08, 0.06, 0.09, 1.0, 1.5, 1.0, -0.03, 0.01, 0.08, 1.0, 0.04, 3.0, 0.15, 0.07}, BACK = {0.25, 0.08, 0.06, 0.09, 1.0, 1.5, 1.0, 0, 0.01, 0.08, 1.0, 0.04, 3.0, 0.15, 0.07}, HOLD = {0, 0.08, 0.06, 0.09, 1.0, 1.5, 1.0, -0.03, 0.01, 0.08, 1.0, 0.04, 3.0, 0.15, 0.07};
     static final int TICK = 4;                         // the legs the engine runs are aimed again every TICK physics steps
     /** What the legs do this turn: 1 a step forward, -1 a step back, 2 standing (the poses and the punches), 0 when they follow the targets of the turn (the kicks, JUMP, JOINTS). */
     public final int[] walking = new int[2];
@@ -200,10 +219,43 @@ public final class Game {
     /** The pelvis is never asked more than RISE higher or DROP lower than it is now. */
     static final double RISE = 0.06, DROP = 0.02;
     /**
-     * A fighter that stands is about to tip over when its weight is going more than CAP_M past its feet: the foot on that side is then put
-     * CAP_AHEAD beyond where the weight is going. A foot that travels during a step is put at least CATCH beyond where the weight is going.
+     * A fighter that stands is about to tip over when its weight is going more than CAP_M past its feet (past the foot on the floor when
+     * the other one is in the air): a foot is then put CAP_AHEAD beyond where the weight is going. A foot that travels during a step is
+     * put at least CATCH beyond where the weight is going.
      */
     public static final double CAP_M = 0.02, CAP_AHEAD = 0.08, CATCH = 0.08;
+    /**
+     * A fighter that walks first keeps its balance: for the turn its legs hold its place, as they do in STANCE, and its step starts again
+     * from its first turn after. Decided at the start of every turn, from what the input of the turn tells:
+     * - where the weight is going (weightX) against the feet: on the first turn of a step, it is less than WALK_INSIDE inside the heel of
+     *   the rear foot, or, for STEP_BACK, less than WALK_INSIDE inside the toes of the front foot (a step back lifts the rear foot first:
+     *   the weight must be on neither edge); on a later turn, it is more than WALK_PAST beyond the feet on the side opposite to the step
+     *   (behind the heel of the rear foot for STEP_FORWARD, ahead of the toes of the front foot for STEP_BACK);
+     * - the fighter goes the way it walks faster than WALK_FAST (forward) or WALK_FAST_BACK (backwards), in m/s;
+     * - the fighter still goes the other way faster than WALK_AGAINST while its weight is going beyond the foot that stays (a step forward
+     *   lifts the foot of the lead leg, a step back the foot of the rear leg, wherever the feet are): behind the heel of the foot of the rear
+     *   leg for STEP_FORWARD, ahead of the toes of the foot of the lead leg for STEP_BACK. That step would take away the foot that carries it;
+     * - the step follows GUARD, RELAX, DUCK, a punch or a step that held its place, and the legs of a pose now take a step to catch the
+     *   balance or a foot is in the air; or, for STEP_FORWARD, the trunk leans more than WALK_LEAN degrees forward. Feet that are only out
+     *   of place do not hold the walker: its step puts them back.
+     */
+    public static final double WALK_PAST = 0.10, WALK_INSIDE = 0.13, WALK_FAST = 1.3, WALK_FAST_BACK = 0.7, WALK_LEAN = 30, WALK_AGAINST = 0.3;
+    final boolean[] braked = new boolean[2];           // decided at the start of each turn
+    final boolean[] afterHold = new boolean[2];        // the legs held on the turn before (read from the move and its turn when the command is given)
+    boolean brakes(int f) {
+        int d = walking[f];
+        if (d != 1 && d != -1) return false;
+        if (d * Physics.FACING[f] * w.comVX(f) > (d > 0 ? WALK_FAST : WALK_FAST_BACK)) return true;
+        double xl = ankleX(f, true), xr = ankleX(f, false), xw = weightX(f);
+        double behind = Math.min(xl, xr) - HEEL - xw, ahead = xw - Math.max(xl, xr) - FOOT;   // the weight beyond the heel of the rear foot, the toes of the front foot
+        if (frame[f] == 0 ? behind > -WALK_INSIDE || d < 0 && ahead > -WALK_INSIDE : (d > 0 ? behind : ahead) > WALK_PAST) return true;
+        if (-d * Physics.FACING[f] * w.comVX(f) > WALK_AGAINST && (d > 0 ? xr - HEEL - xw : xw - xl - FOOT) > 0) return true;
+        if (!afterHold[f]) return false;
+        hold(f);                                       // what the legs of a pose do now
+        if (catching[f] || footY(f, true) > GROUND || footY(f, false) > GROUND || d > 0 && leanNow(f) > WALK_LEAN) return true;
+        calm[f] = false;
+        return false;
+    }
     final boolean[] calm = new boolean[2];             // inside a turn: the legs of a settled fighter have been aimed
 
     double ankleX(int f, boolean lead) { return Physics.FACING[f] * w.px[f * NP + (lead ? Physics.LTOE : Physics.RTOE)] - FOOT; }
@@ -279,7 +331,8 @@ public final class Game {
      * Everything is decided from where the feet, the pelvis and the weight are now: a step that was cut short is finished by what comes next.
      * t counts the physics steps since the move began; with d = 0 the same rules put the feet back at SPACING.
      */
-    void step(int f, int dir, double d, double[] n, int t, double cap) {
+    void step(int f, int dir, double d, double[] n, int t, double cap) { step(f, dir, d, n, t, cap, 0); }
+    void step(int f, int dir, double d, double[] n, int t, double cap, int toward) {
         double xl = ankleX(f, true), xr = ankleX(f, false), p = pelvisX(f), xi = weightX(f), lean = poseLean[f];
         double now = w.py[f * NP + Physics.PELVIS] - ANKLE_Y;
         boolean leadFirst = dir > 0;
@@ -289,11 +342,23 @@ public final class Game {
         double wide = dir * (first - second) - SPACING;                     // how much further apart than in the stance the feet are
         double edge = leadFirst ? first - HEEL : first + FOOT;             // the edge of the first foot the weight has to reach
         boolean apart = Math.abs(wide) > TOL;
-        int go;                                                             // 0 settle, 1 the first foot travels, 2 the second foot travels, 3 push
+        boolean split = Math.abs(xl - xr) > SPLIT;                          // the feet are farther apart than both legs can reach
+        int go;                                                             // 0 settle, 1 the first foot travels, 2 the second foot travels, 3 push, 4 push onto the foot that stays
         boolean capture = !Double.isNaN(cap);
+        // a walker whose weight has left the first foot the way it walks takes its next step at once (the body has gone ahead of the feet)
+        boolean ahead = !capture && d > 0 && dir * (xi - (leadFirst ? first + FOOT : first - HEEL)) > CAP_M;
+        // a walking step that begins with the feet crossed (the first foot is behind the one that stays): the first foot does not leave the floor
+        // before the weight point is ONTO past the edge of the foot that stays; until then both legs push the weight there
+        double stay = leadFirst ? second - HEEL : second + FOOT;
+        boolean onto = !capture && d > 0 && !up1 && !up2 && t < STEP_FIRST && dir * (first - second) < 0 && dir * (xi - stay) < ONTO;
         if (capture) go = 2;
-        else if (!up2 && t < STEP_FIRST && (up1 || (d - wide > NEAR && (t < STEP_START || wide > START_MIN)))) go = 1;
-        else if (apart) go = !up1 && dir * (xi - edge) >= -(n[EDGE] + (up2 ? LATE : 0)) ? 2 : 3;
+        else if (onto) go = 4;
+        else if (!up2 && (ahead || t < STEP_FIRST && (up1 || (d - wide > NEAR && (t < STEP_START || wide > START_MIN))))) go = 1;
+        else if (apart) {
+            // in a split the pelvis cannot reach the first foot: once the weight is past the middle of the feet and the pelvis no longer advances, the second foot is brought in
+            boolean stalled = (split || wide > WIDE) && dir * (xi - (first + second) / 2) >= 0 && dir * pelvisV(f) < SPLIT_V;
+            go = !up1 && (stalled || dir * (xi - edge) >= -(n[EDGE] + (up2 || split ? LATE : 0))) ? 2 : 3;
+        }
         else go = 0;
         stage[f] = go;
         if (go != 0) calm[f] = false;
@@ -313,10 +378,21 @@ public final class Game {
             double px = capture ? p : p + clamp(n[G_HOME] * (home + COM_X - xi), n[PUSH]);
             double h = height(f, px, first, first, now, n, poseH[f]);
             leg(f, leadFirst, px - first, h, lean, STEP_S);
-            swing(f, !leadFirst, capture ? -dir : wide > 0 ? dir : -dir, second, y2, place, p, now, n);
+            // a catching foot travels toward its place, which can be back toward the body (see hold())
+            int travel = capture ? (place >= second ? 1 : -1) : wide > 0 ? dir : -dir;
+            // the weight has left the first foot on the side the second one would move away from: that foot is put down where it is
+            if (!capture && travel != dir && dir * (xi - (leadFirst ? first + FOOT : first - HEEL)) > CAP_M) place = second;
+            // a foot that hangs in the air while nothing moves any more cannot reach its place: it is put down where it is
+            if (!capture && up2 && Math.abs(pelvisV(f)) < REST_V && Math.abs(w.vx[f * NP + (leadFirst ? Physics.RTOE : Physics.LTOE)]) < REST_V) place = second;
+            swing(f, !leadFirst, travel, second, y2, place, p, now, n);
+        } else if (go == 4) {
+            double px = p + clamp(n[G_PUSH] * (stay + dir * (ONTO + n[AIM]) - xi), n[PUSH]);
+            double h = height(f, px, xl, xr, now, n, poseH[f]);
+            leg(f, true, px - xl, h, lean, STEP_S); leg(f, false, px - xr, h, lean, STEP_S);
         } else if (go == 3) {
             double px = p + clamp(n[G_PUSH] * (edge + dir * n[AIM] - xi), n[PUSH]);
-            double h = height(f, px, xl, xr, now, n, poseH[f]), ln = leanNow(f);
+            // in a split, the leg of the first foot alone carries the pelvis: it does not sink, and the other foot is brought in sooner
+            double h = split ? height(f, px, first, first, now, n, poseH[f]) : height(f, px, xl, xr, now, n, poseH[f]), ln = leanNow(f);
             // while the weight is pushed onto the first foot, the other leg holds the trunk, and the foot that receives the weight is pressed on the floor
             double hl = leadFirst ? Math.max(h, now + n[LAND]) : h, hr = leadFirst ? h : Math.max(h, now + n[LAND]);
             leg(f, true, px - xl, hl, leadFirst ? ln : lean, STEP_S); leg(f, false, px - xr, hr, leadFirst ? lean : ln, STEP_S);
@@ -334,22 +410,42 @@ public final class Game {
         double dl = Math.max(0, Math.max(xl - HEEL - xi, xi - xl - FOOT)), dr = Math.max(0, Math.max(xr - HEEL - xi, xi - xr - FOOT));
         int dir = upL != upR ? (upL ? -1 : 1) : dl <= dr ? 1 : -1;
         double cap = Double.NaN;
-        // about to tip over: the foot on that side goes under where the weight is going
-        if (xi > Math.max(xl, xr) + FOOT + CAP_M && !upR) { dir = -1; cap = xi - TOL + CAP_AHEAD; }
-        else if (xi < Math.min(xl, xr) - HEEL - CAP_M && !upL) { dir = 1; cap = xi - TOL - CAP_AHEAD; }
-        boolean capture = !Double.isNaN(cap);
-        // the foot that travels is the one of the other side of `dir`; a step is reported once, not again while it is under way
-        if (capture && !catching[f] && turn - lastCatch[f] > 2) stepDir[f] = -dir;
+        // about to tip over (toward: 1 forward, -1 backward): a foot goes under where the weight is going, the foot of `dir` stays
+        int toward = 0;
+        if (upL != upR) {
+            // one foot in the air: only the other one carries the fighter. When the weight leaves that foot, the foot in the air goes under
+            // the weight, unless its own place in the stance is already further on that side
+            double xs = upL ? xr : xl, home = upL ? xs + SPACING : xs - SPACING;
+            int s = xi > xs + FOOT + CAP_M ? 1 : xi < xs - HEEL - CAP_M ? -1 : 0;
+            // a foot that is itself leaving the floor (a hop) carries nothing: no step is decided on it
+            if (footY(f, upR) > FIRM) s = 0;
+            if (s != 0 && (s * (home - xs) < 0 || s * (xi - TOL + s * CAP_AHEAD - home) > 0)) { toward = s; dir = upR ? 1 : -1; }
+        } else if (!upL) {
+            // both feet on the floor: the foot the weight is leaving steps past the other one, which carries the fighter meanwhile
+            if (xi > Math.max(xl, xr) + FOOT + CAP_M) { toward = 1; dir = xl >= xr ? 1 : -1; }
+            else if (xi < Math.min(xl, xr) - HEEL - CAP_M) { toward = -1; dir = xl >= xr ? -1 : 1; }
+        }
+        if (toward != 0) cap = xi - TOL + toward * CAP_AHEAD;
+        // a foot in the air that is already LAND_PAST past the weight point goes no farther (chasing a body that keeps going makes the step longer
+        // and longer): it comes down where it is; with the feet more than COME_IN apart, it comes down closer to the body when the catch point is on
+        // that side (the feet come back together). Closer feet are left alone: pulling a foot in under a body that still moves takes its support away
+        if (toward != 0 && upL != upR) {
+            double xa = upL ? xl : xr, past = toward > 0 ? xa + FOOT - xi : xi - (xa - HEEL);
+            if (past >= LAND_PAST) cap = Math.abs((upL ? xr : xl) - xa) <= COME_IN ? xa : toward > 0 ? Math.min(xa, cap) : Math.max(xa, cap);
+        }
+        boolean capture = toward != 0;
+        // a step is reported once, not again while it is under way
+        if (capture && !catching[f] && turn - lastCatch[f] > 2) stepDir[f] = toward;
         catching[f] = capture;
         if (capture) lastCatch[f] = turn;
         // the feet are put back SPACING apart when they are more than TOL from it (DUCK_TOL while ducked)
         double wide = xl - xr - SPACING;
-        if (!capture && Math.abs(wide) <= (poseH[f] < HIGH[1] - 0.02 ? DUCK_TOL : TOL)) {
+        if (!capture && (Math.abs(wide) <= (poseH[f] < HIGH[1] - 0.02 ? DUCK_TOL : TOL))) {
             stage[f] = 0;
             if (!calm[f]) { calm[f] = true; aim(f); }
             return;
         }
-        step(f, dir, 0, HOLD, STEP_FIRST, cap);
+        step(f, dir, 0, HOLD, STEP_FIRST, cap, toward);
     }
 
     /** -1 when the fighter is about to tip over backwards, 1 forwards, 0 when it stands: where its weight is going, against its feet. */
@@ -364,6 +460,7 @@ public final class Game {
     public double reflex(int f) {
         int o = f * NP, s = Physics.FACING[f];
         double e = s * (w.comX(f) - (w.px[o + Physics.RHEEL] + w.px[o + Physics.LTOE]) / 2), v = s * w.comVX(f);
+        e -= Math.max(0, Math.min(RREST * (1 - rise[f] / (double) Moves.RISE), e));
         return Math.max(-RMAX, Math.min(RMAX, RKP * e + RKD * v));
     }
 
@@ -384,10 +481,14 @@ public final class Game {
         }
         int hp0 = w.hp[0], hp1 = w.hp[1];
         calm[0] = calm[1] = false;
+        // decided once, from where the fighter is at the start of the turn
+        for (int f = 0; f < 2; f++) braked[f] = brakes(f);
         w.beginTurn(roundAsked[0], roundAsked[1]);
         for (int s = 0; s < Physics.STEPS; s++) {
             if (s % TICK == 0) for (int f = 0; f < 2; f++) if (walking[f] != 0) {
                 if (walking[f] == 2) hold(f);
+                // a walker that first keeps its balance holds its place this turn: its step starts after
+                else if (braked[f]) hold(f);
                 else { double[] n = walking[f] > 0 ? FWD : BACK; step(f, walking[f], n[D], n, frame[f] * Physics.STEPS + s, Double.NaN); }
                 w.setMotors(f, target[f], strength[f]);
             }
@@ -403,20 +504,28 @@ public final class Game {
         sinceContact = w.contactSteps > 0 ? 0 : Math.min(sinceContact + 1, STALE);
         sinceHit = hitLoss[0] > 0 || hitLoss[1] > 0 ? 0 : Math.min(sinceHit + 1, WINDOW + 1);
         if (staminaOn) for (int f = 0; f < 2; f++) stamina[f] = Math.max(0, stamina[f] - HIT_DRAIN * hitLoss[f]);
-        // a fall costs FALL, except when the fighters have been pushing each other without anyone landing a hit
+        // a fall costs FALL, or PUSH_FALL when the fighters have been pushing each other without anyone landing a hit
         boolean push = sinceContact <= WINDOW && sinceHit > WINDOW;
         stoodUp = false;
+        // a split too deep to stand up from is a fall: at the end of the turn, the ankles more than SPLIT apart and the pelvis lower than SPLIT_LOW
+        for (int f = 0; f < 2; f++) {
+            split[f] = !w.down[f] && !w.out[f] && Math.abs(w.px[f * NP + Physics.LANK] - w.px[f * NP + Physics.RANK]) > SPLIT && w.py[f * NP + Physics.PELVIS] < SPLIT_LOW;
+            if (split[f]) { w.down[f] = true; w.downPt[f] = Physics.PELVIS; if (w.fallStep[f] < 0) w.fallStep[f] = Physics.STEPS - 1; }
+        }
         for (int f = 0; f < 2; f++) {
             down[f] = w.down[f]; out[f] = w.out[f]; fallStep[f] = w.fallStep[f];
             boolean fell = down[f] || out[f];
-            freeFall[f] = fell && push;
-            if (fell && !push) w.hp[f] -= FALL;
+            pushFall[f] = fell && push;
+            if (fell) w.hp[f] -= push ? PUSH_FALL : FALL;
             stoodUp |= fell;
         }
         if (stoodUp) standUp();
         else {
             w.roundState();
-            for (int f = 0; f < 2; f++) if (move[f] != Moves.NONE && !Moves.HELD[move[f]] && ++frame[f] >= Moves.LENGTH[move[f]]) { move[f] = Moves.STANCE; frame[f] = 0; }
+            for (int f = 0; f < 2; f++) if (move[f] != Moves.NONE && !Moves.HELD[move[f]]) {
+                if (braked[f]) frame[f] = 0;
+                else if (++frame[f] >= Moves.LENGTH[move[f]]) { move[f] = Moves.STANCE; frame[f] = 0; }
+            }
         }
         roundAsked[0] = roundAsked[1] = false;
         turn++;
@@ -510,8 +619,8 @@ public final class Game {
             move[f] = g.move[f]; frame[f] = g.frame[f]; rise[f] = g.rise[f]; stamina[f] = g.stamina[f];
             System.arraycopy(g.target[f], 0, target[f], 0, NJ); System.arraycopy(g.strength[f], 0, strength[f], 0, NJ);
             roundAsked[f] = g.roundAsked[f];
-            walking[f] = g.walking[f]; poseX[f] = g.poseX[f]; poseH[f] = g.poseH[f]; poseLean[f] = g.poseLean[f]; stepDir[f] = g.stepDir[f]; lastCatch[f] = g.lastCatch[f]; catching[f] = g.catching[f];
-            down[f] = g.down[f]; out[f] = g.out[f]; freeFall[f] = g.freeFall[f]; hitLoss[f] = g.hitLoss[f]; fallStep[f] = g.fallStep[f];
+            walking[f] = g.walking[f]; poseX[f] = g.poseX[f]; poseH[f] = g.poseH[f]; poseLean[f] = g.poseLean[f]; stepDir[f] = g.stepDir[f]; lastCatch[f] = g.lastCatch[f]; catching[f] = g.catching[f]; afterHold[f] = g.afterHold[f];
+            down[f] = g.down[f]; out[f] = g.out[f]; pushFall[f] = g.pushFall[f]; split[f] = g.split[f]; hitLoss[f] = g.hitLoss[f]; fallStep[f] = g.fallStep[f];
         }
         turn = g.turn; sinceContact = g.sinceContact; sinceHit = g.sinceHit; stoodUp = g.stoodUp;
     }

@@ -13,7 +13,7 @@ public final class Moves {
     public static final boolean[] HELD = {true, true, true, true, false, false, false, false, false, false, false, false};
     // a round kick: the kicking leg passes beside the body
     public static final boolean[] ROUND = {false, false, false, false, false, false, false, false, true, false, false, false};
-    public static final int[] LENGTH = {1, 1, 1, 1, 3, 3, 3, 6, 12, 7, 7, 7};
+    public static final int[] LENGTH = {1, 1, 1, 1, 3, 3, 4, 6, 12, 7, 7, 7};
     /** Targets: T[move][frame][joint], hundredths of a degree. */
     public static final int[][][] T = {
         {   // STANCE
@@ -38,8 +38,9 @@ public final class Moves {
             {2500, -900, 2400, -700, 9500, 7500, 5600, 10600, 0, 3958, 3645, -1097, -246, 726, -2222},
             {1000, 500, 500, 1500, 9500, 7500, -1000, 9000, 10500, 3266, 2803, -77, 358, 2538, -2720}
         },
-        {   // OVERHAND
-            {1000, 400, 1000, 1200, 9500, 7500, -2300, 11800, 11000, 3562, 3243, -582, 27, 1705, -2578},
+        {   // OVERHAND (the wind-up is held for 2 turns)
+            {1000, 400, 1000, 1200, 9500, 7500, -2300, 10500, 11000, 3562, 3243, -582, 27, 1705, -2578},
+            {1000, 400, 1000, 1200, 9500, 7500, -2300, 10500, 11000, 3562, 3243, -582, 27, 1705, -2578},
             {2500, -1000, 2500, -2200, 9500, 7500, 5400, 10800, 400, 3925, 3330, -825, 147, 1250, -2273},
             {1000, 500, 500, 1500, 9500, 7500, -1000, 9000, 10500, 3266, 2803, -77, 358, 2538, -2720}
         },
@@ -120,14 +121,15 @@ public final class Moves {
         {   // OVERHAND
             {80, 100, 100, 100, 40, 40, 100, 100, 100, 100, 100, 100, 100, 100, 100},
             {80, 100, 100, 100, 40, 40, 100, 100, 100, 100, 100, 100, 100, 100, 100},
+            {80, 100, 100, 100, 40, 40, 100, 100, 100, 100, 100, 100, 100, 100, 100},
             {80, 60, 60, 50, 40, 40, 50, 40, 40, 80, 80, 80, 80, 80, 80}
         },
-        {   // KICK
+        {   // KICK (the knee of the kicking leg is loose while it comes back: it gives way on a body in its path)
             {80, 60, 60, 50, 40, 40, 50, 40, 40, 94, 94, 94, 94, 94, 94},
             {80, 60, 60, 50, 40, 40, 50, 40, 40, 100, 100, 100, 100, 100, 100},
             {80, 60, 60, 50, 40, 40, 50, 40, 40, 100, 100, 100, 100, 100, 100},
-            {80, 60, 60, 50, 40, 40, 50, 40, 40, 100, 100, 100, 100, 100, 100},
-            {80, 60, 60, 50, 40, 40, 50, 40, 40, 100, 100, 100, 100, 100, 100},
+            {80, 60, 60, 50, 40, 40, 50, 40, 40, 100, 40, 100, 100, 100, 100},
+            {80, 60, 60, 50, 40, 40, 50, 40, 40, 100, 40, 100, 100, 100, 100},
             {80, 60, 60, 50, 40, 40, 50, 40, 40, 100, 100, 100, 100, 100, 100}
         },
         {   // HIGH_KICK
@@ -182,7 +184,7 @@ public final class Moves {
     static {
         LUNGE[JAB] = new double[][]{{0.113, 0.859, 16.3}, {0, 0.850, 5.4}, {0, 0.850, 5.4}};
         LUNGE[CROSS] = new double[][]{{0.092, 0.848, 14.1}, {0.092, 0.848, 14.1}, {0, 0.850, 5.4}};
-        LUNGE[OVERHAND] = new double[][]{{0.044, 0.850, 9.0}, {0.075, 0.853, 14.3}, {0, 0.850, 5.4}};
+        LUNGE[OVERHAND] = new double[][]{{0.044, 0.850, 9.0}, {0.044, 0.850, 9.0}, {0.075, 0.853, 14.3}, {0, 0.850, 5.4}};
     }
     /** The STANCE pose, where a fighter starts and stands up again: millimetres forward of the pelvis, millimetres above the floor. */
     public static final int[] STANCE_X = {115, 47, 16, 0, 0, 69, 369, 443, 12, 311, 264, 206, 200, 150, 370, -14, -220, -270, -50};

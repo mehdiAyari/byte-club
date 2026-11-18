@@ -31,6 +31,8 @@ copy.apply(1, opponentCommand);     // the opponent's command you predict
 copy.simulate();                    // copy.inputLines(0) is now exactly what you will read next turn
 ```
 
+[`starter/Player.java`](starter/Player.java) is a player ready to paste in the IDE: one file with the four engine classes without their comments (about 69,000 characters, under the 100,000 of the IDE). Each turn it rebuilds the match from the input, tries each named move 4 turns ahead on a copy and plays the best one. It is an example of how to simulate, not a strong player. Set its `LEAGUE` constant to the league being played: the input does not give it.
+
 The engine is four classes in [`src/main/java/com/codingame/game/engine`](src/main/java/com/codingame/game/engine):
 - `Physics`: the bodies, the motors, the contacts and the strikes;
 - `Game`: the turn, the legs the engine runs, falls and stamina;

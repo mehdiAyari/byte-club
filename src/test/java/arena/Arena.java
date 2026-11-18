@@ -38,7 +38,7 @@ public final class Arena {
         public final StringBuilder evlog = new StringBuilder();
         public int simChecks, simBad, mirrorBad, negative; public String simFirst = "", mirrorFirst = "", negativeFirst = "";
         public final List<int[][]> film = new ArrayList<int[][]>();
-        /** Every fall: {turn, fighter, 1 for a ring-out, 1 when free, HP it lost to hits in the window, HP it took from the other, turns since the last contact, turns since its last recovery step started, 1 when it was in a recovery step}. */
+        /** Every fall: {turn, fighter, 1 for a ring-out, 1 after a push, HP it lost to hits in the window, HP it took from the other, turns since the last contact, turns since its last recovery step started, 1 when it was in a recovery step}. */
         public final List<int[]> fallLog = new ArrayList<int[]>();
         public Game last;
     }
@@ -113,8 +113,8 @@ public final class Arena {
                 for (int u = Math.max(0, t - Game.WINDOW); u <= t; u++) { tk += took[u][f]; gv += took[u][1 - f]; }
                 int tk10 = 0, gv10 = 0;
                 for (int u = Math.max(0, t - 10); u <= t; u++) { tk10 += took[u][f]; gv10 += took[u][1 - f]; }
-                r.fallLog.add(new int[]{t, f, g.down[f] ? 0 : 1, g.freeFall[f] ? 1 : 0, tk, gv, Math.min(999, t - lastContact), Math.min(999, t - recStart[f]), inStep[f] ? 1 : 0, tk10, gv10});
-                if (g.freeFall[f]) { r.freeFalls[f]++; r.evlog.append("free); "); }
+                r.fallLog.add(new int[]{t, f, g.down[f] ? 0 : 1, g.pushFall[f] ? 1 : 0, tk, gv, Math.min(999, t - lastContact), Math.min(999, t - recStart[f]), inStep[f] ? 1 : 0, tk10, gv10});
+                if (g.pushFall[f]) { r.freeFalls[f]++; r.hpFall[f] += Game.PUSH_FALL; r.evlog.append("-" + Game.PUSH_FALL + ", push); "); }
                 else {
                     r.hpFall[f] += Game.FALL;
                     r.evlog.append("-20, took ").append(tk).append(" gave ").append(gv).append(" in " + Game.WINDOW + " turns").append(t - lastContact > Game.WINDOW ? ", no contact); " : "); ");
@@ -184,7 +184,7 @@ public final class Arena {
             for (int j = 0; j < Physics.NJ; j++) if (m.target[o][j] != g.target[f][j] || m.strength[o][j] != g.strength[f][j]) return "motor " + Physics.JNAME[j] + " of fighter " + f + ": " + g.target[f][j] + " against " + m.target[o][j];
             for (int k = 0; k < NS; k++) if (m.w.apart[o * NS + k] != g.w.apart[f * NS + k]) return "contact counter " + k + " of fighter " + f;
             if (m.w.roundLeg[o] != g.w.roundLeg[f]) return "round flag of fighter " + f;
-            if (m.down[o] != g.down[f] || m.out[o] != g.out[f] || m.freeFall[o] != g.freeFall[f]) return "fall of fighter " + f;
+            if (m.down[o] != g.down[f] || m.out[o] != g.out[f] || m.pushFall[o] != g.pushFall[f]) return "fall of fighter " + f;
         }
         if (m.sinceContact != g.sinceContact || m.sinceHit != g.sinceHit) return "contact or hit counters";
         return null;
@@ -196,7 +196,7 @@ public final class Arena {
     }
 
     public static String line(Result r) {
-        return String.format(Locale.ROOT, "%s | HP lost to hits %d/%d, to falls %d/%d | falls %d/%d (free %d/%d) outs %d/%d | first contact t%d, first hit t%d | resets %d | far %d%% | recovery steps %d/%d | bot ms/turn %.1f/%.1f (max %.0f/%.0f)",
+        return String.format(Locale.ROOT, "%s | HP lost to hits %d/%d, to falls %d/%d | falls %d/%d (pushed %d/%d) outs %d/%d | first contact t%d, first hit t%d | resets %d | far %d%% | recovery steps %d/%d | bot ms/turn %.1f/%.1f (max %.0f/%.0f)",
             describe(r), r.hpHit[0], r.hpHit[1], r.hpFall[0], r.hpFall[1], r.falls[0], r.falls[1], r.freeFalls[0], r.freeFalls[1], r.outs[0], r.outs[1], r.firstContact, r.firstHit, r.resets,
             100 * r.farTurns / Math.max(1, r.turns), r.recoveries[0], r.recoveries[1], r.botNanos[0] / 1e6 / Math.max(1, r.turns), r.botNanos[1] / 1e6 / Math.max(1, r.turns), r.botMax[0] / 1e6, r.botMax[1] / 1e6);
     }

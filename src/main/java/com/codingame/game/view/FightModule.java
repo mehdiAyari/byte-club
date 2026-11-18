@@ -113,7 +113,7 @@ public class FightModule implements Module {
             events.add(new int[]{0, (int) e[0], (int) e[1], Physics.SH[(int) e[2]][2], Physics.SH[(int) e[3]][2], (int) e[5], (int) Math.rint(e[6] * 1000), (int) Math.rint(e[7] * 1000), (int) Math.rint(e[4] * 10)});
         for (double[] e : g.w.blockEvents) events.add(new int[]{3, (int) e[0], (int) e[1], (int) Math.rint(e[2] * 1000), (int) Math.rint(e[3] * 1000)});
         for (int f = 0; f < 2; f++) {
-            if (g.down[f] || g.out[f]) events.add(new int[]{1, g.fallStep[f], f, g.down[f] ? 0 : 1, g.freeFall[f] ? 1 : 0, g.down[f] ? g.w.downPt[f] : -1});
+            if (g.down[f] || g.out[f]) events.add(new int[]{1, g.fallStep[f], f, g.down[f] ? 0 : 1, g.pushFall[f] ? 1 : 0, g.down[f] ? g.w.downPt[f] : -1});
         }
         if (!events.isEmpty()) frame.put("e", new ArrayList<>(events));
         if (g.stoodUp) { frame.put("r", 1); System.arraycopy(start, 0, last, 0, last.length); }

@@ -1061,9 +1061,9 @@ export class FightModule {
         this.hits.push(hit)
         if (hit.dmg > 0) losses.push([hit.t, 1 - hit.who, hit.dmg])
       } else if (e[0] === 1) {
-        const fall = { t: t0 + (step(e[1]) + 1) / 10, who: e[2] ? 1 : 0, out: e[3] === 1, free: e[4] === 1, point: e[5], n }
+        const fall = { t: t0 + (step(e[1]) + 1) / 10, who: e[2] ? 1 : 0, out: e[3] === 1, push: e[4] === 1, point: e[5], n }
         this.falls.push(fall)
-        if (!fall.free) losses.push([fall.t, fall.who, 20])
+        losses.push([fall.t, fall.who, fall.push ? 10 : 20])
       } else if (e[0] === 2) {
         this.steps.push({ t: t0, who: e[1] ? 1 : 0, dir: e[2] < 0 ? -1 : 1, n })
       } else if (e[0] === 3) {
@@ -1151,7 +1151,7 @@ export class FightModule {
   lastLoss () {
     let last = null
     for (const h of this.hits) if (h.dmg > 0 && (!last || h.t >= last.t)) last = h
-    for (const f of this.falls) if (!f.free && (!last || f.t >= last.t)) last = f
+    for (const f of this.falls) if (!last || f.t >= last.t) last = f
     return last
   }
 
@@ -1204,8 +1204,8 @@ export class FightModule {
         alpha: Math.min(1, age / 3) * (age > BAN.life - 8 ? (BAN.life - age) / 8 : 1),
         color: TONE[e.who].label,
         big: this.name(e.who) + (e.out ? ' RING OUT' : ' DOWN'),
-        cost: e.free ? 'no HP lost' : '−20 HP',
-        costColor: e.free ? 'rgba(255,255,255,0.72)' : '#ff8a5c',
+        cost: e.push ? '−10 HP' : '−20 HP',
+        costColor: '#ff8a5c',
         small: e.out ? 'left the ring' : part ? part + ' on the mat' : null
       })
     }
